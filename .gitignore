@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Superpowers / Claude
+.superpowers/
+.claude/
+docs/
+
+# Templates de desarrollo
+templates/
+
+# Screenshot de trabajo
+screenshot-path.png
