@@ -555,6 +555,34 @@
       </div>
     </div>
 
+
+    <!-- SLIDE 07: EL PROCESO DE DELIVERY — CAMINO INTERACTIVO -->
+    <div class="slide" id="slide-07">
+      <div class="content-top">
+        <div class="section-tag" data-a>El proceso de delivery</div>
+        <div class="slide-title" style="font-size:clamp(32px,4vw,48px);" data-a>
+          De la propuesta al<br><em>cliente que firma el UAT</em>
+        </div>
+      </div>
+      <div id="journey-track" class="journey-track" data-a></div>
+      <div class="journey-drawer" id="journey-drawer" data-a>
+        <div class="drawer-default">Pasa el cursor sobre una parada para ver el detalle</div>
+        <div class="drawer-content" style="display:none;">
+          <div class="drawer-num" id="drawer-num"></div>
+          <div class="drawer-detail">
+            <div class="drawer-agent" id="drawer-agent"></div>
+            <div class="drawer-title" id="drawer-title"></div>
+            <div class="drawer-body"  id="drawer-body"></div>
+            <div class="drawer-link"  id="drawer-link" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">07 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+
   </div>
   <div id="progress"></div>
 
@@ -584,7 +612,7 @@
     };
 
     /* ==================== SLIDE ENGINE ==================== */
-    const TOTAL_SLIDES = 6;
+    const TOTAL_SLIDES = 7;
     let currentIndex = 0;
     let isAnimating  = false;
 
@@ -670,11 +698,86 @@
       if (glow)  gsap.to(glow,  { opacity: .9, scale: 1.08, duration: 2.8, ease: 'power1.inOut', yoyo: true, repeat: -1, delay: .6 });
     }
 
-    /* ==================== JOURNEY MAP ==================== */
-    // renderJourneyTrack() and drawer logic added in Tasks 4 & 5
+    /* ==================== JOURNEY MAP RENDER ==================== */
+    const JOURNEY_GROUPS = [
+      { agent: null,           stops: [0] },
+      { agent: 'consultor',    stops: [1, 2, 3, 4] },
+      { agent: 'arquitecto',   stops: [5, 6, 7, 8] },
+      { agent: 'desarrollador',stops: [9] },
+      { agent: 'consultor',    stops: [10, 11] },
+    ];
+
+    function createStopEl(stop) {
+      const colors = stop.agent
+        ? AGENT_COLORS[stop.agent]
+        : { bg: 'rgba(255,255,255,.08)', border: 'rgba(255,255,255,.2)', text: 'rgba(255,255,255,.45)', labelBg: 'rgba(255,255,255,.06)' };
+
+      const el = document.createElement('div');
+      el.className = 'journey-stop';
+      el.dataset.stopId = stop.id;
+      el.style.setProperty('--stop-color', colors.text);
+
+      const circle = document.createElement('div');
+      circle.className = 'journey-stop-circle';
+      circle.style.cssText = `background:${colors.bg};border-color:${colors.border};color:${colors.text};`;
+      circle.textContent = String(stop.id).padStart(2, '0');
+
+      const label = document.createElement('div');
+      label.className = 'journey-stop-label';
+      label.textContent = stop.label;
+
+      el.appendChild(circle);
+      el.appendChild(label);
+
+      if (stop.tools && stop.tools.length) {
+        const toolEl = document.createElement('div');
+        toolEl.className = 'journey-stop-tool';
+        toolEl.textContent = stop.tools.join(' · ');
+        el.appendChild(toolEl);
+      }
+
+      return el;
+    }
+
+    function renderJourneyTrack() {
+      const track = document.getElementById('journey-track');
+      if (!track) return;
+      track.innerHTML = '';
+
+      JOURNEY_GROUPS.forEach((group, gi) => {
+        if (gi > 0) {
+          const arrow = document.createElement('div');
+          arrow.className = 'journey-arrow';
+          arrow.textContent = '→';
+          track.appendChild(arrow);
+        }
+
+        if (group.agent === null) {
+          const stop = STOPS[group.stops[0]];
+          const el = createStopEl(stop);
+          el.style.flexShrink = '0';
+          track.appendChild(el);
+        } else {
+          const colors = AGENT_COLORS[group.agent];
+          const zone = document.createElement('div');
+          zone.className = 'journey-zone';
+          zone.style.cssText = `background:${colors.bg};border-color:${colors.border};border:1px solid ${colors.border};`;
+
+          const zLabel = document.createElement('div');
+          zLabel.className = 'journey-zone-label';
+          zLabel.style.cssText = `background:${colors.labelBg};color:${colors.text};`;
+          zLabel.textContent = group.agent.charAt(0).toUpperCase() + group.agent.slice(1);
+          zone.appendChild(zLabel);
+
+          group.stops.forEach(idx => zone.appendChild(createStopEl(STOPS[idx])));
+          track.appendChild(zone);
+        }
+      });
+    }
 
     /* ==================== INIT ==================== */
     function init() {
+      renderJourneyTrack();
       buildProgress();
       const slides = getSlides();
       slides.forEach((s, i) => {
