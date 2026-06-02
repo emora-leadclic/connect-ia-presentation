@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IA con criterio — Studio Connect, WAM Global</title>
+  <style>
+    /* ==================== FONTS ==================== */
+    @font-face {
+      font-family: 'TiemposFine';
+      src: url('fonts/TiemposFine-Regular.woff2') format('woff2');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'TiemposFine';
+      src: url('fonts/TiemposFine-Italic.woff2') format('woff2');
+      font-weight: 400; font-style: italic; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/Inter-Regular.woff2') format('woff2');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/Inter-Medium.woff2') format('woff2');
+      font-weight: 500; font-style: normal; font-display: swap;
+    }
+
+    /* ==================== VARIABLES ==================== */
+    :root {
+      --bg:             #080808;
+      --text:           #ffffff;
+      --text-muted:     #555555;
+      --text-dim:       #333333;
+      --accent:         #FF7EFF;
+      --accent-co:      #FF7EFF;
+      --accent-ca:      #64B4FF;
+      --accent-cd:      #50F0A0;
+      --surface:        rgba(255,255,255,0.03);
+      --surface-border: rgba(255,255,255,0.07);
+      --font-title:     'TiemposFine', Georgia, serif;
+      --font-body:      'Inter', system-ui, -apple-system, sans-serif;
+      --slide-pad-x:    72px;
+      --slide-pad-y:    52px;
+    }
+
+    /* ==================== RESET & BASE ==================== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==================== SLIDE ENGINE ==================== */
+    #presentation {
+      position: relative;
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+    }
+    .slide {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      gap: 24px;
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+      opacity: 0; pointer-events: none;
+      will-change: transform, opacity;
+    }
+    .slide.is-active { pointer-events: auto; }
+
+    /* ==================== PROGRESS ==================== */
+    #progress {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 7px; align-items: center;
+      z-index: 200;
+    }
+    .dot {
+      border-radius: 50%; background: #222;
+      transition: width .3s, height .3s, background .3s, box-shadow .3s;
+      cursor: pointer; width: 6px; height: 6px;
+    }
+    .dot.is-active {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(255,126,255,.6);
+    }
+
+    /* ==================== WAM LOGO ==================== */
+    .wam-logo { display: flex; align-items: center; gap: 10px; }
+    .wam-bar  { width: 4px; height: 24px; background: var(--accent); border-radius: 2px; }
+    .wam-wordmark { font-family: var(--font-body); font-weight: 500; font-size: 12px; letter-spacing: 4px; }
+
+    /* ==================== SECTION TAG ==================== */
+    .section-tag {
+      font-size: 10px; font-weight: 500; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-tag::before {
+      content: ''; display: block;
+      width: 24px; height: 2px;
+      background: var(--accent); border-radius: 1px; flex-shrink: 0;
+    }
+
+    /* ==================== SLIDE TITLE ==================== */
+    .slide-title {
+      font-family: var(--font-title);
+      font-size: 54px; font-weight: 400;
+      line-height: 1.1; letter-spacing: -0.5px; color: var(--text);
+    }
+    .slide-title em { font-style: italic; color: var(--accent); }
+
+    /* ==================== SLIDE FOOTER ==================== */
+    .slide-footer {
+      display: flex; align-items: center;
+      justify-content: space-between; padding-bottom: 8px;
+    }
+    .slide-num { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+    .nav-hint  { display: flex; align-items: center; gap: 6px; }
+    .nav-key   {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 4px; padding: 2px 8px; font-size: 10px; color: var(--text-dim);
+    }
+
+    /* ==================== CONTENT WRAPPERS ==================== */
+    .content-top  { display: flex; flex-direction: column; gap: 20px; }
+    .content-body {
+      flex: 1; min-height: 0; overflow: hidden;
+      display: flex; flex-direction: column;
+      justify-content: center; gap: 24px;
+    }
+
+    /* ==================== CARDS ==================== */
+    .cards-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 12px; padding: 24px;
+      transition: transform .2s ease, border-color .2s ease; cursor: default;
+    }
+    .card:hover { transform: translateY(-3px); border-color: rgba(255,126,255,.3); }
+    .card-eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    .card-title  { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+    .card-body   { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+
+    /* ==================== ACCENT LINE ==================== */
+    .accent-line {
+      font-family: var(--font-title); font-style: italic;
+      font-size: 18px; color: var(--accent);
+      border-left: 2px solid var(--accent);
+      padding-left: 16px; line-height: 1.4;
+    }
+
+    /* ==================== SETUP STEPS ==================== */
+    .setup-steps { display: flex; flex-direction: column; gap: 16px; }
+    .setup-step  {
+      display: flex; align-items: flex-start; gap: 20px;
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 12px; padding: 20px 24px;
+      transition: border-color .2s;
+    }
+    .setup-step:hover { border-color: rgba(255,126,255,.3); }
+    .step-num { font-family: var(--font-title); font-style: italic; font-size: 32px; color: var(--accent); line-height: 1; flex-shrink: 0; width: 32px; }
+    .step-content-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .step-content-body  { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ==================== THREE-COL / COL-BLOCK ==================== */
+    .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .col-block {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 12px; padding: 24px;
+    }
+    .col-block-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
+    .col-block ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .col-block ul li { font-size: 14px; color: var(--text-muted); line-height: 1.5; padding-left: 14px; position: relative; }
+    .col-block ul li::before { content: '–'; position: absolute; left: 0; color: var(--accent); }
+
+    /* ==================== RECIPE FLOW (slide 5) ==================== */
+    .recipe-flow {
+      display: flex; align-items: center; gap: 12px; margin: 8px 0 16px;
+    }
+    .recipe-step {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 10px; padding: 14px 20px; flex: 1; text-align: center;
+    }
+    .recipe-step-icon  { font-size: 20px; line-height: 1; display: block; margin-bottom: 6px; }
+    .recipe-step-label { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+    .recipe-step-desc  { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .recipe-arrow      { color: var(--text-dim); font-size: 18px; flex-shrink: 0; }
+
+    /* ==================== JOURNEY MAP (slide 7) ==================== */
+    .journey-track {
+      display: flex; align-items: center;
+      gap: 8px; width: 100%;
+      margin-top: 4px;
+    }
+    .journey-start-stop {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; padding: 4px 8px; flex-shrink: 0;
+    }
+    .journey-zone {
+      display: flex; align-items: center;
+      padding: 8px 10px; border-radius: 12px;
+      position: relative; flex: 1;
+      border: 1px solid transparent;
+    }
+    .journey-zone-label {
+      position: absolute; top: -9px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 8px; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 2px 10px;
+      border-radius: 4px; white-space: nowrap;
+    }
+    .journey-stop {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+      padding: 4px 5px; flex: 1;
+      border-radius: 8px; cursor: default;
+      transition: background .15s;
+    }
+    .journey-stop:hover { background: rgba(255,255,255,.04); }
+    .journey-stop-circle {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600;
+      border: 1px solid transparent;
+      transition: box-shadow .2s;
+    }
+    .journey-stop.is-active .journey-stop-circle {
+      box-shadow: 0 0 0 3px var(--stop-color, var(--accent));
+    }
+    .journey-stop-label {
+      font-size: 8.5px; color: #444; text-align: center;
+      line-height: 1.3; max-width: 68px;
+    }
+    .journey-stop-tool {
+      font-size: 7.5px; color: #333; letter-spacing: .5px;
+      font-style: italic;
+    }
+    .journey-arrow { color: #2a2a2a; font-size: 16px; flex-shrink: 0; }
+    .journey-drawer {
+      border: 1px solid var(--surface-border);
+      border-radius: 12px; padding: 16px 24px;
+      min-height: 86px; display: flex;
+      align-items: center;
+      transition: border-color .25s;
+    }
+    .journey-drawer.has-content { border-color: rgba(255,126,255,.25); }
+    .drawer-default {
+      font-size: 13px; color: #2a2a2a; font-style: italic;
+      width: 100%; text-align: center;
+    }
+    .drawer-content {
+      display: flex; gap: 24px;
+      align-items: flex-start; width: 100%;
+    }
+    .drawer-num {
+      font-family: var(--font-title); font-style: italic;
+      font-size: 52px; line-height: 1;
+      color: rgba(255,255,255,.05);
+      flex-shrink: 0; min-width: 58px;
+    }
+    .drawer-detail { flex: 1; }
+    .drawer-agent {
+      font-size: 9px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 5px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .drawer-agent::before {
+      content: ''; display: block;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0;
+    }
+    .drawer-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 5px; line-height: 1.35; }
+    .drawer-body  { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .drawer-link  { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+
+    /* ==================== DEMO PLACEHOLDER (slide 8) ==================== */
+    .demo-placeholder {
+      flex: 1; border: 1px dashed rgba(255,255,255,.1);
+      border-radius: 12px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px;
+    }
+    .demo-placeholder-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .demo-placeholder-hint { font-size: 13px; color: #222; }
+
+    /* ==================== CLOSING SLIDE (slide 10) ==================== */
+    #slide-10 { overflow: hidden; align-items: center; justify-content: center; text-align: center; }
+    .cierre-glow {
+      position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(255,126,255,.1) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .cierre-quote {
+      font-family: var(--font-title); font-style: italic;
+      font-size: clamp(32px,5vw,60px);
+      line-height: 1.2; color: var(--text); max-width: 600px; margin-bottom: 16px;
+    }
+    .cierre-credits { font-size: 13px; color: var(--text-dim); letter-spacing: 1px; }
+    .cierre-wam {
+      position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 8px; opacity: .3;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+      :root { --slide-pad-x: 28px; --slide-pad-y: 32px; }
+      .slide-title { font-size: clamp(28px,8vw,44px) !important; }
+      .cards-3, .three-col { grid-template-columns: 1fr !important; gap: 12px; }
+      .recipe-flow { flex-direction: column; }
+      .recipe-arrow { transform: rotate(90deg); }
+      .journey-track { overflow-x: auto; padding-bottom: 8px; }
+      #progress { bottom: 16px; }
+    }
+    @media (max-width: 480px) {
+      :root { --slide-pad-x: 20px; --slide-pad-y: 24px; }
+      .nav-hint { display: none; }
+    }
+
+    /* ==================== COVER ==================== */
+    #slide-01 { position: relative; overflow: hidden; }
+    #cover-glow {
+      position: absolute; top: -120px; right: -120px;
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, rgba(255,126,255,.12) 0%, transparent 65%);
+      border-radius: 50%; pointer-events: none; will-change: transform, opacity;
+    }
+    #cover-title {
+      font-family: var(--font-title);
+      font-size: clamp(52px,7vw,84px);
+      font-weight: 400; line-height: 1.05; letter-spacing: -1px;
+      color: var(--text); will-change: transform;
+    }
+    #cover-title em { font-style: italic; color: var(--accent); }
+    .cover-eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+    .cover-meta    { font-size: 11px; color: var(--text-dim); letter-spacing: .5px; }
+  </style>
+</head>
+<body>
+  <div id="presentation">
+
+    <!-- SLIDE 01: PORTADA -->
+    <div class="slide" id="slide-01">
+      <div id="cover-glow"></div>
+      <div class="wam-logo" data-a>
+        <div class="wam-bar"></div>
+        <div class="wam-wordmark">
+          <svg style="height:20px;width:auto;display:block;" viewBox="0 0 616.94 183.34" xmlns="http://www.w3.org/2000/svg">
+            <path d="M248.48,183.34L292.23,0h64.96l43.75,183.34h-36.15l-8.91-39.28h-62.34l-8.9,39.28h-36.16ZM300.87,111.05h47.42l-21.22-93.76h-4.72l-21.48,93.76ZM.16,10.47c-.89,37.86-2.99,126.53,30.25,160.47,9.32,9.51,20.6,14.32,33.54,14.32h.16c16.7-.05,32.53-10.52,45.8-29.94,15.22,19.48,32.97,29.94,51.4,29.94,13.72,0,25.65-5.07,35.44-15.06,29.65-30.28,32.33-97.64,31.02-159.54-.09-4.34-.16-7.96-.16-10.66h-23.21c0,2.83.08,6.63.18,11.15.67,31.57,2.43,115.42-24.41,142.82-5.41,5.52-11.4,8.1-18.85,8.1-13.03,0-26.88-10.52-38.96-29.27,11.25-25.06,18.16-55.99,18.12-81.54-.02-14.71-2.29-26.76-6.74-35.81-5.96-12.12-15.92-18.78-28.07-18.78-11.47,0-20.91,5.97-26.61,16.8-4.29,8.16-6.46,19.04-6.46,32.31,0,27.03,8.93,60.63,23.29,87.68.04.06.08.14.11.2-9.92,17.9-21.55,28.35-31.96,28.39h-.09c-6.65,0-12.03-2.34-16.95-7.36C20.61,127.75,22.61,42.95,23.36,11.02c.11-4.61.2-8.27.2-11.03H.35c0,2.48-.09,6.02-.19,10.49ZM95.82,45.78c0-4.33.48-25.9,9.86-25.9,8.51,0,11.57,16.92,11.58,31.41.03,16.53-3.28,35.68-9,53.5-7.75-19.73-12.44-41.4-12.44-58.99h0ZM616.94.77l-.76,4.07c-1.53,5.77-2.68,11.15-3.44,16.15-.76,5-1.15,10.29-1.15,15.89v109.34c0,5.6.38,10.89,1.15,15.89.76,5,1.91,10.39,3.44,16.15l.76,4.07v1.01h-38.4v-1.01l.76-4.07c1.36-5.76,2.46-11.15,3.3-16.15.84-5,1.27-10.3,1.27-15.89V28.57l-59.24,154.77h-13.98l-60.03-154.38c-.18,2.56-.27,5.2-.27,7.92v95.1c0,7.63.81,15.13,2.42,22.5,1.61,7.37,3.69,14.79,6.23,22.24.34,1.01.67,1.96,1.02,2.8.34.86.59,1.7.76,2.54v1.27h-31.27v-1.27c.17-.84.42-1.7.76-2.54.34-.84.67-1.78,1.02-2.8,2.37-7.46,4.41-14.87,6.1-22.24,1.7-7.38,2.54-14.88,2.54-22.5V36.88c0-9.67-2.2-20.34-6.61-32.04l-1.53-3.81V.27h7.67,0s28.73-.01,28.73-.01l58.35,149.37L583.87.03v-.03h33.07v.77Z" fill="#FFFFFF"/>
+          </svg>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+        <div class="cover-eyebrow" data-a>Studio Connect · WAM Global</div>
+        <div id="cover-title" data-a>IA con <em>criterio</em></div>
+        <div style="margin-top:20px;font-size:16px;color:var(--text-muted);" data-a>
+          Cómo el Studio de Connect ha rediseñado<br>el delivery de proyectos Salesforce con IA.
+        </div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="cover-meta">Gonzalo · Enric · Borja — Studio Connect</div>
+        <div class="nav-hint">
+          <span class="nav-key">←</span><span class="nav-key">→</span>
+          <span style="font-size:10px;color:var(--text-dim);margin-left:4px;">navegar</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div id="progress"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    /* ===== DATOS PARADAS SLIDE 7 — EDITAR AQUÍ ===== */
+    const STOPS = [
+      { id: 1,  label: "Traspaso comercial",          agent: null,           agentLabel: "Inicio",        description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 2,  label: "Kickoff & workshops",          agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 3,  label: "Sesiones de consultoría",      agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: ["Gemini"] },
+      { id: 4,  label: "Diseño de la solución func.",  agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 5,  label: "Documento funcional",          agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 6,  label: "Análisis doc. funcional",      agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 7,  label: "Modelo de datos",              agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 8,  label: "Inventario técnico",           agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 9,  label: "Desglose de tareas",           agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 10, label: "Implementación de tareas",     agent: "desarrollador",agentLabel: "Desarrollador", description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 11, label: "Diseño de UATs",               agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 12, label: "Ejecución de UATs",            agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+    ];
+    /* ===== FIN DATOS PARADAS ===== */
+
+    const AGENT_COLORS = {
+      consultor:     { bg: 'rgba(255,126,255,.1)',  border: 'rgba(255,126,255,.28)', text: '#FF7EFF', labelBg: 'rgba(255,126,255,.15)' },
+      arquitecto:    { bg: 'rgba(100,180,255,.1)',  border: 'rgba(100,180,255,.28)', text: '#64B4FF', labelBg: 'rgba(100,180,255,.15)' },
+      desarrollador: { bg: 'rgba(80,240,160,.1)',   border: 'rgba(80,240,160,.28)',  text: '#50F0A0', labelBg: 'rgba(80,240,160,.15)' },
+    };
+
+    /* ==================== SLIDE ENGINE ==================== */
+    const TOTAL_SLIDES = 1;
+    let currentIndex = 0;
+    let isAnimating  = false;
+
+    const getSlides = () => document.querySelectorAll('.slide');
+    const getDots   = () => document.querySelectorAll('.dot');
+
+    function updateProgress() {
+      getDots().forEach((d, i) => d.classList.toggle('is-active', i === currentIndex));
+    }
+
+    function goToSlide(targetIndex, direction) {
+      if (isAnimating) return;
+      if (targetIndex < 0 || targetIndex >= TOTAL_SLIDES) return;
+      if (targetIndex === currentIndex) return;
+      isAnimating = true;
+
+      const slides    = getSlides();
+      const fromSlide = slides[currentIndex];
+      const toSlide   = slides[targetIndex];
+      if (!fromSlide || !toSlide) { isAnimating = false; return; }
+
+      const dir  = direction !== undefined ? direction : (targetIndex > currentIndex ? 1 : -1);
+      const toEls = toSlide.querySelectorAll('[data-a]');
+      if (toEls.length) gsap.set(toEls, { opacity: 0 });
+
+      gsap.set(toSlide, { xPercent: dir * 100, opacity: 1 });
+      toSlide.classList.add('is-active');
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          fromSlide.classList.remove('is-active');
+          gsap.set(fromSlide, { xPercent: -dir * 100, opacity: 0 });
+          currentIndex = targetIndex;
+          isAnimating  = false;
+          updateProgress();
+        },
+        onInterrupt: () => { isAnimating = false; }
+      });
+      tl.to(fromSlide, { xPercent: -dir * 100, duration: 0.5, ease: 'power2.inOut' }, 0);
+      tl.to(toSlide,   { xPercent: 0,           duration: 0.5, ease: 'power2.inOut' }, 0);
+      if (toEls.length) {
+        tl.to(toEls, { opacity: 1, duration: 0.4, stagger: 0.1, ease: 'power2.out', clearProps: 'opacity' }, 0.15);
+      }
+    }
+
+    const goNext = () => goToSlide(currentIndex + 1,  1);
+    const goPrev = () => goToSlide(currentIndex - 1, -1);
+
+    document.addEventListener('keydown', e => {
+      if (['ArrowRight','ArrowDown',' '].includes(e.key)) { e.preventDefault(); goNext(); }
+      if (['ArrowLeft','ArrowUp'].includes(e.key))        { e.preventDefault(); goPrev(); }
+    });
+
+    document.getElementById('presentation').addEventListener('click', e => {
+      if (e.target.closest('.dot') || e.target.closest('.journey-stop') || e.target.closest('.drawer-link')) return;
+      e.clientX > window.innerWidth / 2 ? goNext() : goPrev();
+    });
+
+    let touchStartX = 0, touchStartY = 0;
+    document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; touchStartY = e.changedTouches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend',   e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) dx < 0 ? goNext() : goPrev();
+    }, { passive: true });
+
+    function buildProgress() {
+      const c = document.getElementById('progress');
+      c.innerHTML = '';
+      for (let i = 0; i < TOTAL_SLIDES; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 0 ? ' is-active' : '');
+        dot.addEventListener('click', () => goToSlide(i));
+        c.appendChild(dot);
+      }
+    }
+
+    /* ==================== GSAP ANIMATIONS ==================== */
+    function startBreathing() {
+      const title = document.getElementById('cover-title');
+      const glow  = document.getElementById('cover-glow');
+      if (title) gsap.to(title, { scale: 1.018, duration: 3.2, ease: 'power1.inOut', yoyo: true, repeat: -1, transformOrigin: 'left center' });
+      if (glow)  gsap.to(glow,  { opacity: .9, scale: 1.08, duration: 2.8, ease: 'power1.inOut', yoyo: true, repeat: -1, delay: .6 });
+    }
+
+    /* ==================== JOURNEY MAP ==================== */
+    // renderJourneyTrack() and drawer logic added in Tasks 4 & 5
+
+    /* ==================== INIT ==================== */
+    function init() {
+      buildProgress();
+      const slides = getSlides();
+      slides.forEach((s, i) => {
+        if (i === 0) { s.classList.add('is-active'); gsap.set(s, { opacity: 1, xPercent: 0 }); }
+        else          { gsap.set(s, { opacity: 0, xPercent: 100 }); }
+      });
+      updateProgress();
+      startBreathing();
+      document.fonts.ready.then(() => {
+        const els = slides[0] ? slides[0].querySelectorAll('[data-a]') : [];
+        if (els.length) gsap.fromTo(els, { opacity: 0 }, { opacity: 1, duration: 0.45, stagger: 0.12, ease: 'power2.out', clearProps: 'opacity' });
+      });
+    }
+    init();
+  </script>
+</body>
+</html>
