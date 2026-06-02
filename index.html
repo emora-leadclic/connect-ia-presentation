@@ -698,6 +698,74 @@
       if (glow)  gsap.to(glow,  { opacity: .9, scale: 1.08, duration: 2.8, ease: 'power1.inOut', yoyo: true, repeat: -1, delay: .6 });
     }
 
+    /* ==================== JOURNEY DRAWER INTERACTION ==================== */
+    let drawerHideTimeout = null;
+
+    function showDrawer(stop) {
+      clearTimeout(drawerHideTimeout);
+
+      const drawer    = document.getElementById('journey-drawer');
+      const defaultEl = drawer.querySelector('.drawer-default');
+      const contentEl = drawer.querySelector('.drawer-content');
+      const colors    = stop.agent ? AGENT_COLORS[stop.agent] : { text: 'rgba(255,255,255,.45)', border: 'rgba(255,255,255,.15)' };
+
+      document.getElementById('drawer-num').textContent   = String(stop.id).padStart(2, '0');
+      document.getElementById('drawer-title').textContent = stop.label;
+      document.getElementById('drawer-body').textContent  = stop.description;
+
+      const agentEl = document.getElementById('drawer-agent');
+      agentEl.style.color = colors.text;
+      agentEl.textContent = stop.agentLabel;
+
+      const linkEl = document.getElementById('drawer-link');
+      if (stop.videoUrl) {
+        linkEl.style.display  = 'flex';
+        linkEl.style.color    = colors.text;
+        linkEl.textContent    = '▶ Ver demo';
+        linkEl.onclick        = () => window.open(stop.videoUrl, '_blank');
+      } else if (stop.description.startsWith('[PENDIENTE')) {
+        linkEl.style.display  = 'block';
+        linkEl.style.color    = '#2a2a2a';
+        linkEl.textContent    = '[PENDIENTE: enlace vídeo]';
+        linkEl.onclick        = null;
+      } else {
+        linkEl.style.display  = 'none';
+      }
+
+      drawer.style.borderColor = colors.border || 'rgba(255,126,255,.25)';
+      drawer.classList.add('has-content');
+      defaultEl.style.display = 'none';
+      contentEl.style.display = 'flex';
+
+      gsap.fromTo(contentEl,
+        { opacity: 0, y: 6 },
+        { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' }
+      );
+
+      document.querySelectorAll('.journey-stop').forEach(s => s.classList.remove('is-active'));
+      const activeEl = document.querySelector(`.journey-stop[data-stop-id="${stop.id}"]`);
+      if (activeEl) activeEl.classList.add('is-active');
+    }
+
+    function hideDrawer() {
+      drawerHideTimeout = setTimeout(() => {
+        const drawer    = document.getElementById('journey-drawer');
+        const defaultEl = drawer.querySelector('.drawer-default');
+        const contentEl = drawer.querySelector('.drawer-content');
+
+        gsap.to(contentEl, {
+          opacity: 0, y: 4, duration: 0.15, ease: 'power2.in',
+          onComplete: () => {
+            contentEl.style.display  = 'none';
+            defaultEl.style.display  = 'block';
+            drawer.style.borderColor = 'var(--surface-border)';
+            drawer.classList.remove('has-content');
+            document.querySelectorAll('.journey-stop').forEach(s => s.classList.remove('is-active'));
+          }
+        });
+      }, 80);
+    }
+
     /* ==================== JOURNEY MAP RENDER ==================== */
     const JOURNEY_GROUPS = [
       { agent: null,           stops: [0] },
@@ -735,6 +803,9 @@
         toolEl.textContent = stop.tools.join(' · ');
         el.appendChild(toolEl);
       }
+
+      el.addEventListener('mouseenter', () => showDrawer(stop));
+      el.addEventListener('mouseleave', () => hideDrawer());
 
       return el;
     }
