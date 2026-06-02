@@ -1,0 +1,1231 @@
+# exCo IA Presentation — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Build a single-file web presentation (`index.html`) for the WAM Global exCo IA session, matching the design system of the two existing templates and featuring a full-width interactive journey map on slide 7.
+
+**Architecture:** One `index.html` at project root, zero server dependencies (opens with `file://`). GSAP from CDN for transitions. Fonts from local `fonts/` directory. Slide engine and visual language are copied verbatim from `templates/sample-presentation.html` — do not invent new patterns. Journey map and hover drawer are new components built on the same CSS variables.
+
+**Tech Stack:** HTML5, CSS custom properties, vanilla JS, GSAP 3.12.5 (CDN)
+
+**Spec:** `docs/superpowers/specs/2026-06-02-exco-ia-presentation-design.md`
+
+---
+
+## File Structure
+
+| File | Action | Responsibility |
+|------|--------|----------------|
+| `index.html` | Create | Entire presentation — all slides, CSS, JS, data |
+
+All code lives in `index.html`. The `fonts/` directory already contains the required font files. No other files are created.
+
+---
+
+## Task 1: Scaffold — slide engine + CSS system + Slide 1 (Portada)
+
+**Files:**
+- Create: `index.html`
+
+This task produces a working slide engine with exactly one slide (the portada). Navigation, progress dots, GSAP transitions, fonts, and the cover breathing animation must all work before moving on. Every subsequent task just adds slides.
+
+- [ ] **Step 1: Create `index.html` with full CSS system and Slide 1**
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IA con criterio — Studio Connect, WAM Global</title>
+  <style>
+    /* ==================== FONTS ==================== */
+    @font-face {
+      font-family: 'TiemposFine';
+      src: url('fonts/TiemposFine-Regular.woff2') format('woff2');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'TiemposFine';
+      src: url('fonts/TiemposFine-Italic.woff2') format('woff2');
+      font-weight: 400; font-style: italic; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/Inter-Regular.woff2') format('woff2');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/Inter-Medium.woff2') format('woff2');
+      font-weight: 500; font-style: normal; font-display: swap;
+    }
+
+    /* ==================== VARIABLES ==================== */
+    :root {
+      --bg:             #080808;
+      --text:           #ffffff;
+      --text-muted:     #555555;
+      --text-dim:       #333333;
+      --accent:         #FF7EFF;
+      --accent-co:      #FF7EFF;
+      --accent-ca:      #64B4FF;
+      --accent-cd:      #50F0A0;
+      --surface:        rgba(255,255,255,0.03);
+      --surface-border: rgba(255,255,255,0.07);
+      --font-title:     'TiemposFine', Georgia, serif;
+      --font-body:      'Inter', system-ui, -apple-system, sans-serif;
+      --slide-pad-x:    72px;
+      --slide-pad-y:    52px;
+    }
+
+    /* ==================== RESET & BASE ==================== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==================== SLIDE ENGINE ==================== */
+    #presentation {
+      position: relative;
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+    }
+    .slide {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      gap: 24px;
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+      opacity: 0; pointer-events: none;
+      will-change: transform, opacity;
+    }
+    .slide.is-active { pointer-events: auto; }
+
+    /* ==================== PROGRESS ==================== */
+    #progress {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 7px; align-items: center;
+      z-index: 200;
+    }
+    .dot {
+      border-radius: 50%; background: #222;
+      transition: width .3s, height .3s, background .3s, box-shadow .3s;
+      cursor: pointer; width: 6px; height: 6px;
+    }
+    .dot.is-active {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(255,126,255,.6);
+    }
+
+    /* ==================== WAM LOGO ==================== */
+    .wam-logo { display: flex; align-items: center; gap: 10px; }
+    .wam-bar  { width: 4px; height: 24px; background: var(--accent); border-radius: 2px; }
+    .wam-wordmark { font-family: var(--font-body); font-weight: 500; font-size: 12px; letter-spacing: 4px; }
+
+    /* ==================== SECTION TAG ==================== */
+    .section-tag {
+      font-size: 10px; font-weight: 500; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-tag::before {
+      content: ''; display: block;
+      width: 24px; height: 2px;
+      background: var(--accent); border-radius: 1px; flex-shrink: 0;
+    }
+
+    /* ==================== SLIDE TITLE ==================== */
+    .slide-title {
+      font-family: var(--font-title);
+      font-size: 54px; font-weight: 400;
+      line-height: 1.1; letter-spacing: -0.5px; color: var(--text);
+    }
+    .slide-title em { font-style: italic; color: var(--accent); }
+
+    /* ==================== SLIDE FOOTER ==================== */
+    .slide-footer {
+      display: flex; align-items: center;
+      justify-content: space-between; padding-bottom: 8px;
+    }
+    .slide-num { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+    .nav-hint  { display: flex; align-items: center; gap: 6px; }
+    .nav-key   {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 4px; padding: 2px 8px; font-size: 10px; color: var(--text-dim);
+    }
+
+    /* ==================== CONTENT WRAPPERS ==================== */
+    .content-top  { display: flex; flex-direction: column; gap: 20px; }
+    .content-body {
+      flex: 1; min-height: 0; overflow: hidden;
+      display: flex; flex-direction: column;
+      justify-content: center; gap: 24px;
+    }
+
+    /* ==================== CARDS ==================== */
+    .cards-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 12px; padding: 24px;
+      transition: transform .2s ease, border-color .2s ease; cursor: default;
+    }
+    .card:hover { transform: translateY(-3px); border-color: rgba(255,126,255,.3); }
+    .card-eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    .card-title  { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+    .card-body   { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+
+    /* ==================== ACCENT LINE ==================== */
+    .accent-line {
+      font-family: var(--font-title); font-style: italic;
+      font-size: 18px; color: var(--accent);
+      border-left: 2px solid var(--accent);
+      padding-left: 16px; line-height: 1.4;
+    }
+
+    /* ==================== SETUP STEPS ==================== */
+    .setup-steps { display: flex; flex-direction: column; gap: 16px; }
+    .setup-step  {
+      display: flex; align-items: flex-start; gap: 20px;
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 12px; padding: 20px 24px;
+      transition: border-color .2s;
+    }
+    .setup-step:hover { border-color: rgba(255,126,255,.3); }
+    .step-num { font-family: var(--font-title); font-style: italic; font-size: 32px; color: var(--accent); line-height: 1; flex-shrink: 0; width: 32px; }
+    .step-content-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .step-content-body  { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ==================== TWO-COL / COL-BLOCK ==================== */
+    .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .col-block {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 12px; padding: 24px;
+    }
+    .col-block-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
+    .col-block ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .col-block ul li { font-size: 14px; color: var(--text-muted); line-height: 1.5; padding-left: 14px; position: relative; }
+    .col-block ul li::before { content: '–'; position: absolute; left: 0; color: var(--accent); }
+
+    /* ==================== RECIPE FLOW (slide 5) ==================== */
+    .recipe-flow {
+      display: flex; align-items: center; gap: 12px; margin: 8px 0 16px;
+    }
+    .recipe-step {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 10px; padding: 14px 20px; flex: 1; text-align: center;
+    }
+    .recipe-step-icon  { font-size: 20px; line-height: 1; display: block; margin-bottom: 6px; }
+    .recipe-step-label { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+    .recipe-step-desc  { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .recipe-arrow      { color: var(--text-dim); font-size: 18px; flex-shrink: 0; }
+
+    /* ==================== JOURNEY MAP (slide 7) ==================== */
+    .journey-track {
+      display: flex; align-items: center;
+      gap: 8px; width: 100%;
+      margin-top: 4px;
+    }
+    .journey-start-stop {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; padding: 4px 8px; flex-shrink: 0;
+    }
+    .journey-zone {
+      display: flex; align-items: center;
+      padding: 8px 10px; border-radius: 12px;
+      position: relative; flex: 1;
+      border: 1px solid transparent;
+    }
+    .journey-zone-label {
+      position: absolute; top: -9px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 8px; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 2px 10px;
+      border-radius: 4px; white-space: nowrap;
+    }
+    .journey-stop {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+      padding: 4px 5px; flex: 1;
+      border-radius: 8px; cursor: default;
+      transition: background .15s;
+    }
+    .journey-stop:hover { background: rgba(255,255,255,.04); }
+    .journey-stop-circle {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600;
+      border: 1px solid transparent;
+      transition: box-shadow .2s;
+    }
+    .journey-stop.is-active .journey-stop-circle {
+      box-shadow: 0 0 0 3px var(--stop-color, var(--accent));
+    }
+    .journey-stop-label {
+      font-size: 8.5px; color: #444; text-align: center;
+      line-height: 1.3; max-width: 68px;
+    }
+    .journey-stop-tool {
+      font-size: 7.5px; color: #333; letter-spacing: .5px;
+      font-style: italic;
+    }
+    .journey-arrow { color: #2a2a2a; font-size: 16px; flex-shrink: 0; }
+    .journey-drawer {
+      border: 1px solid var(--surface-border);
+      border-radius: 12px; padding: 16px 24px;
+      min-height: 86px; display: flex;
+      align-items: center;
+      transition: border-color .25s;
+    }
+    .journey-drawer.has-content { border-color: rgba(255,126,255,.25); }
+    .drawer-default {
+      font-size: 13px; color: #2a2a2a; font-style: italic;
+      width: 100%; text-align: center;
+    }
+    .drawer-content {
+      display: flex; gap: 24px;
+      align-items: flex-start; width: 100%;
+    }
+    .drawer-num {
+      font-family: var(--font-title); font-style: italic;
+      font-size: 52px; line-height: 1;
+      color: rgba(255,255,255,.05);
+      flex-shrink: 0; min-width: 58px;
+    }
+    .drawer-detail { flex: 1; }
+    .drawer-agent {
+      font-size: 9px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 5px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .drawer-agent::before {
+      content: ''; display: block;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0;
+    }
+    .drawer-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 5px; line-height: 1.35; }
+    .drawer-body  { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .drawer-link  { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+
+    /* ==================== DEMO PLACEHOLDER (slide 8) ==================== */
+    .demo-placeholder {
+      flex: 1; border: 1px dashed rgba(255,255,255,.1);
+      border-radius: 12px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px;
+    }
+    .demo-placeholder-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .demo-placeholder-hint { font-size: 13px; color: #222; }
+
+    /* ==================== CLOSING SLIDE (slide 10) ==================== */
+    #slide-10 { overflow: hidden; align-items: center; justify-content: center; text-align: center; }
+    .cierre-glow {
+      position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(255,126,255,.1) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .cierre-quote {
+      font-family: var(--font-title); font-style: italic;
+      font-size: clamp(32px,5vw,60px);
+      line-height: 1.2; color: var(--text); max-width: 600px; margin-bottom: 16px;
+    }
+    .cierre-credits { font-size: 13px; color: var(--text-dim); letter-spacing: 1px; }
+    .cierre-wam {
+      position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 8px; opacity: .3;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+      :root { --slide-pad-x: 28px; --slide-pad-y: 32px; }
+      .slide-title { font-size: clamp(28px,8vw,44px) !important; }
+      .cards-3, .three-col { grid-template-columns: 1fr !important; gap: 12px; }
+      .recipe-flow { flex-direction: column; }
+      .recipe-arrow { transform: rotate(90deg); }
+      .journey-track { overflow-x: auto; padding-bottom: 8px; }
+      #progress { bottom: 16px; }
+    }
+    @media (max-width: 480px) {
+      :root { --slide-pad-x: 20px; --slide-pad-y: 24px; }
+      .nav-hint { display: none; }
+    }
+
+    /* ==================== COVER ==================== */
+    #slide-01 { position: relative; overflow: hidden; }
+    #cover-glow {
+      position: absolute; top: -120px; right: -120px;
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, rgba(255,126,255,.12) 0%, transparent 65%);
+      border-radius: 50%; pointer-events: none; will-change: transform, opacity;
+    }
+    #cover-title {
+      font-family: var(--font-title);
+      font-size: clamp(52px,7vw,84px);
+      font-weight: 400; line-height: 1.05; letter-spacing: -1px;
+      color: var(--text); will-change: transform;
+    }
+    #cover-title em { font-style: italic; color: var(--accent); }
+    .cover-eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+    .cover-meta    { font-size: 11px; color: var(--text-dim); letter-spacing: .5px; }
+  </style>
+</head>
+<body>
+  <div id="presentation">
+
+    <!-- SLIDE 01: PORTADA -->
+    <div class="slide" id="slide-01">
+      <div id="cover-glow"></div>
+      <div class="wam-logo" data-a>
+        <div class="wam-bar"></div>
+        <div class="wam-wordmark">
+          <svg style="height:20px;width:auto;display:block;" viewBox="0 0 616.94 183.34" xmlns="http://www.w3.org/2000/svg">
+            <path d="M248.48,183.34L292.23,0h64.96l43.75,183.34h-36.15l-8.91-39.28h-62.34l-8.9,39.28h-36.16ZM300.87,111.05h47.42l-21.22-93.76h-4.72l-21.48,93.76ZM.16,10.47c-.89,37.86-2.99,126.53,30.25,160.47,9.32,9.51,20.6,14.32,33.54,14.32h.16c16.7-.05,32.53-10.52,45.8-29.94,15.22,19.48,32.97,29.94,51.4,29.94,13.72,0,25.65-5.07,35.44-15.06,29.65-30.28,32.33-97.64,31.02-159.54-.09-4.34-.16-7.96-.16-10.66h-23.21c0,2.83.08,6.63.18,11.15.67,31.57,2.43,115.42-24.41,142.82-5.41,5.52-11.4,8.1-18.85,8.1-13.03,0-26.88-10.52-38.96-29.27,11.25-25.06,18.16-55.99,18.12-81.54-.02-14.71-2.29-26.76-6.74-35.81-5.96-12.12-15.92-18.78-28.07-18.78-11.47,0-20.91,5.97-26.61,16.8-4.29,8.16-6.46,19.04-6.46,32.31,0,27.03,8.93,60.63,23.29,87.68.04.06.08.14.11.2-9.92,17.9-21.55,28.35-31.96,28.39h-.09c-6.65,0-12.03-2.34-16.95-7.36C20.61,127.75,22.61,42.95,23.36,11.02c.11-4.61.2-8.27.2-11.03H.35c0,2.48-.09,6.02-.19,10.49ZM95.82,45.78c0-4.33.48-25.9,9.86-25.9,8.51,0,11.57,16.92,11.58,31.41.03,16.53-3.28,35.68-9,53.5-7.75-19.73-12.44-41.4-12.44-58.99h0ZM616.94.77l-.76,4.07c-1.53,5.77-2.68,11.15-3.44,16.15-.76,5-1.15,10.29-1.15,15.89v109.34c0,5.6.38,10.89,1.15,15.89.76,5,1.91,10.39,3.44,16.15l.76,4.07v1.01h-38.4v-1.01l.76-4.07c1.36-5.76,2.46-11.15,3.3-16.15.84-5,1.27-10.3,1.27-15.89V28.57l-59.24,154.77h-13.98l-60.03-154.38c-.18,2.56-.27,5.2-.27,7.92v95.1c0,7.63.81,15.13,2.42,22.5,1.61,7.37,3.69,14.79,6.23,22.24.34,1.01.67,1.96,1.02,2.8.34.86.59,1.7.76,2.54v1.27h-31.27v-1.27c.17-.84.42-1.7.76-2.54.34-.84.67-1.78,1.02-2.8,2.37-7.46,4.41-14.87,6.1-22.24,1.7-7.38,2.54-14.88,2.54-22.5V36.88c0-9.67-2.2-20.34-6.61-32.04l-1.53-3.81V.27h7.67,0s28.73-.01,28.73-.01l58.35,149.37L583.87.03v-.03h33.07v.77Z" fill="#FFFFFF"/>
+          </svg>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+        <div class="cover-eyebrow" data-a>Studio Connect · WAM Global</div>
+        <div id="cover-title" data-a>IA con <em>criterio</em></div>
+        <div style="margin-top:20px;font-size:16px;color:var(--text-muted);" data-a>
+          Cómo el Studio de Connect ha rediseñado<br>el delivery de proyectos Salesforce con IA.
+        </div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="cover-meta">Gonzalo · Enric · Borja — Studio Connect</div>
+        <div class="nav-hint">
+          <span class="nav-key">←</span><span class="nav-key">→</span>
+          <span style="font-size:10px;color:var(--text-dim);margin-left:4px;">navegar</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div id="progress"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    /* ===== DATOS PARADAS SLIDE 7 — EDITAR AQUÍ ===== */
+    const STOPS = [
+      { id: 1,  label: "Traspaso comercial",          agent: null,           agentLabel: "Inicio",        description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 2,  label: "Kickoff & workshops",          agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 3,  label: "Sesiones de consultoría",      agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: ["Gemini"] },
+      { id: 4,  label: "Diseño de la solución func.",  agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 5,  label: "Documento funcional",          agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 6,  label: "Análisis doc. funcional",      agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 7,  label: "Modelo de datos",              agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 8,  label: "Inventario técnico",           agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 9,  label: "Desglose de tareas",           agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 10, label: "Implementación de tareas",     agent: "desarrollador",agentLabel: "Desarrollador", description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 11, label: "Diseño de UATs",               agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+      { id: 12, label: "Ejecución de UATs",            agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null, tools: [] },
+    ];
+    /* ===== FIN DATOS PARADAS ===== */
+
+    const AGENT_COLORS = {
+      consultor:     { bg: 'rgba(255,126,255,.1)',  border: 'rgba(255,126,255,.28)', text: '#FF7EFF', labelBg: 'rgba(255,126,255,.15)' },
+      arquitecto:    { bg: 'rgba(100,180,255,.1)',  border: 'rgba(100,180,255,.28)', text: '#64B4FF', labelBg: 'rgba(100,180,255,.15)' },
+      desarrollador: { bg: 'rgba(80,240,160,.1)',   border: 'rgba(80,240,160,.28)',  text: '#50F0A0', labelBg: 'rgba(80,240,160,.15)' },
+    };
+
+    /* ==================== SLIDE ENGINE ==================== */
+    const TOTAL_SLIDES = 1; // updated in Task 6
+    let currentIndex = 0;
+    let isAnimating  = false;
+
+    const getSlides = () => document.querySelectorAll('.slide');
+    const getDots   = () => document.querySelectorAll('.dot');
+
+    function updateProgress() {
+      getDots().forEach((d, i) => d.classList.toggle('is-active', i === currentIndex));
+    }
+
+    function goToSlide(targetIndex, direction) {
+      if (isAnimating) return;
+      if (targetIndex < 0 || targetIndex >= TOTAL_SLIDES) return;
+      if (targetIndex === currentIndex) return;
+      isAnimating = true;
+
+      const slides    = getSlides();
+      const fromSlide = slides[currentIndex];
+      const toSlide   = slides[targetIndex];
+      if (!fromSlide || !toSlide) { isAnimating = false; return; }
+
+      const dir  = direction !== undefined ? direction : (targetIndex > currentIndex ? 1 : -1);
+      const toEls = toSlide.querySelectorAll('[data-a]');
+      if (toEls.length) gsap.set(toEls, { opacity: 0 });
+
+      gsap.set(toSlide, { xPercent: dir * 100, opacity: 1 });
+      toSlide.classList.add('is-active');
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          fromSlide.classList.remove('is-active');
+          gsap.set(fromSlide, { xPercent: -dir * 100, opacity: 0 });
+          currentIndex = targetIndex;
+          isAnimating  = false;
+          updateProgress();
+        },
+        onInterrupt: () => { isAnimating = false; }
+      });
+      tl.to(fromSlide, { xPercent: -dir * 100, duration: 0.5, ease: 'power2.inOut' }, 0);
+      tl.to(toSlide,   { xPercent: 0,           duration: 0.5, ease: 'power2.inOut' }, 0);
+      if (toEls.length) {
+        tl.to(toEls, { opacity: 1, duration: 0.4, stagger: 0.1, ease: 'power2.out', clearProps: 'opacity' }, 0.15);
+      }
+    }
+
+    const goNext = () => goToSlide(currentIndex + 1,  1);
+    const goPrev = () => goToSlide(currentIndex - 1, -1);
+
+    document.addEventListener('keydown', e => {
+      if (['ArrowRight','ArrowDown',' '].includes(e.key)) { e.preventDefault(); goNext(); }
+      if (['ArrowLeft','ArrowUp'].includes(e.key))        { e.preventDefault(); goPrev(); }
+    });
+
+    document.getElementById('presentation').addEventListener('click', e => {
+      if (e.target.closest('.dot') || e.target.closest('.journey-stop') || e.target.closest('.drawer-link')) return;
+      e.clientX > window.innerWidth / 2 ? goNext() : goPrev();
+    });
+
+    let touchStartX = 0, touchStartY = 0;
+    document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; touchStartY = e.changedTouches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend',   e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) dx < 0 ? goNext() : goPrev();
+    }, { passive: true });
+
+    function buildProgress() {
+      const c = document.getElementById('progress');
+      c.innerHTML = '';
+      for (let i = 0; i < TOTAL_SLIDES; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 0 ? ' is-active' : '');
+        dot.addEventListener('click', () => goToSlide(i));
+        c.appendChild(dot);
+      }
+    }
+
+    /* ==================== GSAP ANIMATIONS ==================== */
+    function startBreathing() {
+      const title = document.getElementById('cover-title');
+      const glow  = document.getElementById('cover-glow');
+      if (title) gsap.to(title, { scale: 1.018, duration: 3.2, ease: 'power1.inOut', yoyo: true, repeat: -1, transformOrigin: 'left center' });
+      if (glow)  gsap.to(glow,  { opacity: .9, scale: 1.08, duration: 2.8, ease: 'power1.inOut', yoyo: true, repeat: -1, delay: .6 });
+    }
+
+    /* ==================== JOURNEY MAP ==================== */
+    // renderJourneyTrack() and drawer logic — added in Task 4 & 5
+
+    /* ==================== INIT ==================== */
+    function init() {
+      buildProgress();
+      const slides = getSlides();
+      slides.forEach((s, i) => {
+        if (i === 0) { s.classList.add('is-active'); gsap.set(s, { opacity: 1, xPercent: 0 }); }
+        else          { gsap.set(s, { opacity: 0, xPercent: 100 }); }
+      });
+      updateProgress();
+      startBreathing();
+      document.fonts.ready.then(() => {
+        const els = slides[0] ? slides[0].querySelectorAll('[data-a]') : [];
+        if (els.length) gsap.fromTo(els, { opacity: 0 }, { opacity: 1, duration: 0.45, stagger: 0.12, ease: 'power2.out', clearProps: 'opacity' });
+      });
+    }
+    init();
+  </script>
+</body>
+</html>
+```
+
+- [ ] **Step 2: Open `index.html` in browser and verify**
+
+Open `index.html` directly (double-click or `open index.html`).
+
+Expected:
+- Dark `#080808` background
+- WAM logo top-left with pink bar
+- Large "IA con *criterio*" title (italic "criterio" in pink)
+- Subtitle text below
+- "Gonzalo · Enric · Borja" in footer
+- One progress dot at bottom center, pink/active
+- Arrow keys do nothing (only 1 slide)
+- Cover glow blob top-right pulsing gently
+- Title breathing animation running
+
+If fonts don't load: confirm `fonts/TiemposFine-Regular.woff2` and `fonts/Inter-Regular.woff2` exist at those exact paths.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: presentation scaffold — slide engine + slide 1 portada"
+```
+
+---
+
+## Task 2: Slides 2, 3, 4 — ¿Para qué?, Objetivos, Filosofía
+
+**Files:**
+- Modify: `index.html` — add slides 2-4 before `</div><!-- end #presentation -->`, update `TOTAL_SLIDES`
+
+- [ ] **Step 1: Add Slide 2 — ¿Para qué hacemos esto?**
+
+Add this block immediately after the closing `</div>` of `#slide-01`, before `</div><!-- end #presentation -->`:
+
+```html
+    <!-- SLIDE 02: ¿PARA QUÉ HACEMOS ESTO? -->
+    <div class="slide" id="slide-02">
+      <div class="content-top">
+        <div class="section-tag" data-a>El contexto</div>
+        <div class="slide-title" data-a>
+          Los primeros en adaptarse<br><em>marcan el ritmo</em>
+        </div>
+      </div>
+      <div class="content-body">
+        <div class="cards-3" data-a>
+          <div class="card">
+            <div class="card-eyebrow">Las reglas del juego</div>
+            <div class="card-title">La IA generativa ha cambiado el delivery</div>
+            <div class="card-body">Reduce los tiempos de desarrollo de forma estructural. No es una promesa: es lo que ya está pasando en nuestros proyectos.</div>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Nuestro negocio</div>
+            <div class="card-title">El mercado se mueve a otra velocidad</div>
+            <div class="card-body">Como partner, el grueso de nuestro valor está en las horas de proyecto. Los que se adapten primero definen el nuevo estándar.</div>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Nuestra posición</div>
+            <div class="card-title">Ventaja de estar ya a esa velocidad</div>
+            <div class="card-body">No nos mueve el FOMO. Nos mueve la ventaja de estar ya operando a esa velocidad mientras otros aún lo piensan.</div>
+          </div>
+        </div>
+        <div class="accent-line" data-a>"No es una tendencia que viene. Es una ventaja que ya estamos ejerciendo."</div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">02 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+```
+
+- [ ] **Step 2: Add Slide 3 — Objetivos**
+
+```html
+    <!-- SLIDE 03: OBJETIVOS -->
+    <div class="slide" id="slide-03">
+      <div class="content-top">
+        <div class="section-tag" data-a>Qué nos marcamos</div>
+        <div class="slide-title" data-a>Tres objetivos,<br>ninguno <em>negociable</em></div>
+      </div>
+      <div class="content-body" style="gap:14px;">
+        <div class="setup-steps" data-a>
+          <div class="setup-step">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-content-title">IA en todo el proceso de delivery</div>
+              <div class="step-content-body">Desde la consultoría hasta las pruebas y la entrega. No solo en el desarrollo.</div>
+            </div>
+          </div>
+          <div class="setup-step">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-content-title">Con criterio, no a golpe de tendencia</div>
+              <div class="step-content-body">Modelo de trabajo agnóstico, construido sobre estándares — skills, agentes, MCPs. Portable y mantenible.</div>
+            </div>
+          </div>
+          <div class="setup-step">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-content-title">El humano siempre en el juego</div>
+              <div class="step-content-body">El agente propone. La persona decide. Nada se entrega sin supervisión humana.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">03 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+```
+
+- [ ] **Step 3: Add Slide 4 — Filosofía**
+
+```html
+    <!-- SLIDE 04: FILOSOFÍA -->
+    <div class="slide" id="slide-04">
+      <div class="content-top">
+        <div class="section-tag" data-a>Nuestra propuesta de IA</div>
+        <div class="slide-title" data-a>La filosofía en<br><em>tres pilares</em></div>
+      </div>
+      <div class="content-body">
+        <div class="cards-3" data-a>
+          <div class="card">
+            <div class="card-eyebrow">Pilar 1</div>
+            <div class="card-title">Conversacional, no automático</div>
+            <div class="card-body">El agente propone; la persona decide. Nada se entrega sin supervisión humana. El control es siempre del equipo.</div>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Pilar 2</div>
+            <div class="card-title">El humano es el criterio</div>
+            <div class="card-body">El agente incluso cuestiona los puntos débiles del proyecto para forzar mejores decisiones. La IA amplifica el juicio, no lo sustituye.</div>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Pilar 3</div>
+            <div class="card-title">Calidad, no solo velocidad</div>
+            <div class="card-body">Cada paso sigue protocolos estrictos de verificación. No depende de la memoria ni las prisas de una persona.</div>
+          </div>
+        </div>
+        <div class="accent-line" data-a>"La calidad no es una promesa. Está incrustada en el método."</div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">04 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+```
+
+- [ ] **Step 4: Update `TOTAL_SLIDES` to 4**
+
+In the `<script>` block, change:
+```js
+const TOTAL_SLIDES = 1;
+```
+to:
+```js
+const TOTAL_SLIDES = 4;
+```
+
+- [ ] **Step 5: Verify in browser**
+
+Reload `index.html`.
+Expected:
+- 4 progress dots at bottom
+- Arrow right navigates slide 1 → 2 → 3 → 4, left goes back
+- Slide 2: 3 cards appear with stagger animation
+- Slide 3: 3 numbered steps visible
+- Slide 4: 3 cards with pink accent-line below
+- Space bar advances slides
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: add slides 2-4 — context, objectives, philosophy"
+```
+
+---
+
+## Task 3: Slides 5 and 6 — El cómo (cocina) + Los tres asistentes
+
+**Files:**
+- Modify: `index.html`
+
+- [ ] **Step 1: Add Slide 5 — El cómo: de prompters a método**
+
+Add after `#slide-04`:
+
+```html
+    <!-- SLIDE 05: EL CÓMO — ANALOGÍA COCINA -->
+    <div class="slide" id="slide-05">
+      <div class="content-top">
+        <div class="section-tag" data-a>El cómo</div>
+        <div class="slide-title" data-a>De prompters<br>a <em>método</em></div>
+      </div>
+      <div class="content-body">
+        <div class="recipe-flow" data-a>
+          <div class="recipe-step">
+            <span class="recipe-step-icon">📋</span>
+            <div class="recipe-step-label">Skill = Receta</div>
+            <div class="recipe-step-desc">El conocimiento de WAM, escrito en lenguaje natural. La receta es nuestra.</div>
+          </div>
+          <div class="recipe-arrow">→</div>
+          <div class="recipe-step">
+            <span class="recipe-step-icon">🔧</span>
+            <div class="recipe-step-label">MCPs = Instrumentos</div>
+            <div class="recipe-step-desc">Confluence, JIRA, Salesforce, GitHub, Lucid. Estándares del proveedor.</div>
+          </div>
+          <div class="recipe-arrow">→</div>
+          <div class="recipe-step">
+            <span class="recipe-step-icon">📄</span>
+            <div class="recipe-step-label">Ingredientes = Proyecto</div>
+            <div class="recipe-step-desc">Transcripciones, documentación, reuniones. La materia prima de cada engagement.</div>
+          </div>
+          <div class="recipe-arrow">→</div>
+          <div class="recipe-step">
+            <span class="recipe-step-icon">✅</span>
+            <div class="recipe-step-label">Agente = Cocinero</div>
+            <div class="recipe-step-desc">Combina todo y sirve el plato: los entregables del proyecto.</div>
+          </div>
+        </div>
+        <div class="accent-line" data-a>"Construido con Claude Code por ser lo mejor, pero sobre estándares: ya probamos Antigravity como respaldo. No hay dependencia de proveedor."</div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">05 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+```
+
+- [ ] **Step 2: Add Slide 6 — Los tres asistentes**
+
+```html
+    <!-- SLIDE 06: LOS TRES ASISTENTES -->
+    <div class="slide" id="slide-06">
+      <div class="content-top">
+        <div class="section-tag" data-a>Los tres asistentes · todos en GA</div>
+        <div class="slide-title" data-a>Disponibles.<br><em>En uso.</em></div>
+      </div>
+      <div class="content-body" style="gap:16px;">
+        <div class="cards-3" data-a>
+          <div class="card">
+            <div class="card-eyebrow">Agente Consultor</div>
+            <div class="card-title">Del kickoff al documento funcional</div>
+            <div class="card-body">Prepara kickoffs y guiones de sesión, diseña la solución funcional, redacta el documento funcional oficial y define las UATs. El más exportable a otros Studios.</div>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Agente Arquitecto</div>
+            <div class="card-title">De lo funcional a la especificación técnica</div>
+            <div class="card-body">Convierte el documento funcional en análisis técnico, modelo de datos, inventario y desglose de tareas de implementación.</div>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Agente Desarrollador</div>
+            <div class="card-title">Asistencia en la ejecución</div>
+            <div class="card-body">Asiste en la ejecución tarea a tarea de la implementación técnica.</div>
+          </div>
+        </div>
+        <div style="font-size:13px; color:var(--text-muted); line-height:1.7; border-left: 2px solid var(--surface-border); padding-left:16px;" data-a>
+          Son <strong style="color:var(--text)">entidades vivas</strong>: los equipos de Connect las evolucionan de forma autónoma (proceso de Lessons Learnt). Toda la documentación vive en un <strong style="color:var(--text)">Confluence compartido</strong>. Las skills se escriben en <strong style="color:var(--text)">lenguaje natural</strong> — cualquier perfil puede evolucionarlas. No es artesanía de tres personas; es una capacidad de empresa.
+        </div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">06 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+```
+
+- [ ] **Step 3: Update `TOTAL_SLIDES` to 6**
+
+```js
+const TOTAL_SLIDES = 6;
+```
+
+- [ ] **Step 4: Verify in browser**
+
+Reload. Navigate to slides 5 and 6.
+Expected:
+- Slide 5: recipe flow with 4 boxes and arrows between them, accent-line below
+- Slide 6: 3 cards + descriptive text at bottom with em-dashes and bold text
+- 6 progress dots
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: add slides 5-6 — kitchen analogy + three agents"
+```
+
+---
+
+## Task 4: Slide 7 — Journey map layout (timeline + zones, no hover yet)
+
+**Files:**
+- Modify: `index.html`
+
+This task adds the slide 7 HTML shell and renders the timeline from the `STOPS` data. The drawer shows but has no hover interaction yet — that comes in Task 5.
+
+- [ ] **Step 1: Add Slide 7 HTML shell** after `#slide-06`:
+
+```html
+    <!-- SLIDE 07: EL PROCESO DE DELIVERY — CAMINO INTERACTIVO -->
+    <div class="slide" id="slide-07">
+      <div class="content-top">
+        <div class="section-tag" data-a>El proceso de delivery</div>
+        <div class="slide-title" style="font-size:clamp(32px,4vw,48px);" data-a>
+          De la propuesta al<br><em>cliente que firma el UAT</em>
+        </div>
+      </div>
+      <div id="journey-track" class="journey-track" data-a></div>
+      <div class="journey-drawer" id="journey-drawer" data-a>
+        <div class="drawer-default">Pasa el cursor sobre una parada para ver el detalle</div>
+        <div class="drawer-content" style="display:none;">
+          <div class="drawer-num" id="drawer-num"></div>
+          <div class="drawer-detail">
+            <div class="drawer-agent" id="drawer-agent"></div>
+            <div class="drawer-title" id="drawer-title"></div>
+            <div class="drawer-body"  id="drawer-body"></div>
+            <div class="drawer-link"  id="drawer-link" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">07 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+```
+
+- [ ] **Step 2: Add `renderJourneyTrack()` function**
+
+In the `<script>` block, replace the comment `// renderJourneyTrack() and drawer logic — added in Task 4 & 5` with:
+
+```js
+    /* ==================== JOURNEY MAP RENDER ==================== */
+    const JOURNEY_GROUPS = [
+      { agent: null,           stops: [0] },
+      { agent: 'consultor',    stops: [1, 2, 3, 4] },
+      { agent: 'arquitecto',   stops: [5, 6, 7, 8] },
+      { agent: 'desarrollador',stops: [9] },
+      { agent: 'consultor',    stops: [10, 11] },
+    ];
+
+    function createStopEl(stop) {
+      const colors = stop.agent
+        ? AGENT_COLORS[stop.agent]
+        : { bg: 'rgba(255,255,255,.08)', border: 'rgba(255,255,255,.2)', text: 'rgba(255,255,255,.45)', labelBg: 'rgba(255,255,255,.06)' };
+
+      const el = document.createElement('div');
+      el.className = 'journey-stop';
+      el.dataset.stopId = stop.id;
+      el.style.setProperty('--stop-color', colors.text);
+
+      const circle = document.createElement('div');
+      circle.className = 'journey-stop-circle';
+      circle.style.cssText = `background:${colors.bg};border-color:${colors.border};color:${colors.text};`;
+      circle.textContent = String(stop.id).padStart(2, '0');
+
+      const label = document.createElement('div');
+      label.className = 'journey-stop-label';
+      label.textContent = stop.label;
+
+      el.appendChild(circle);
+      el.appendChild(label);
+
+      if (stop.tools && stop.tools.length) {
+        const toolEl = document.createElement('div');
+        toolEl.className = 'journey-stop-tool';
+        toolEl.textContent = stop.tools.join(' · ');
+        el.appendChild(toolEl);
+      }
+
+      return el;
+    }
+
+    function renderJourneyTrack() {
+      const track = document.getElementById('journey-track');
+      if (!track) return;
+      track.innerHTML = '';
+
+      JOURNEY_GROUPS.forEach((group, gi) => {
+        if (gi > 0) {
+          const arrow = document.createElement('div');
+          arrow.className = 'journey-arrow';
+          arrow.textContent = '→';
+          track.appendChild(arrow);
+        }
+
+        if (group.agent === null) {
+          const stop = STOPS[group.stops[0]];
+          const el = createStopEl(stop);
+          el.style.flexShrink = '0';
+          track.appendChild(el);
+        } else {
+          const colors = AGENT_COLORS[group.agent];
+          const zone = document.createElement('div');
+          zone.className = 'journey-zone';
+          zone.style.cssText = `background:${colors.bg};border-color:${colors.border};border:1px solid ${colors.border};`;
+
+          const zLabel = document.createElement('div');
+          zLabel.className = 'journey-zone-label';
+          zLabel.style.cssText = `background:${colors.labelBg};color:${colors.text};`;
+          zLabel.textContent = group.agent.charAt(0).toUpperCase() + group.agent.slice(1);
+          zone.appendChild(zLabel);
+
+          group.stops.forEach(idx => zone.appendChild(createStopEl(STOPS[idx])));
+          track.appendChild(zone);
+        }
+      });
+    }
+```
+
+- [ ] **Step 3: Call `renderJourneyTrack()` in `init()`**
+
+In the `init()` function, add before `buildProgress()`:
+
+```js
+      renderJourneyTrack();
+```
+
+- [ ] **Step 4: Update `TOTAL_SLIDES` to 7**
+
+```js
+const TOTAL_SLIDES = 7;
+```
+
+- [ ] **Step 5: Verify in browser**
+
+Navigate to slide 7.
+Expected:
+- Timeline spans full slide width
+- 5 groups: start node (white/dim) → pink zone "Consultor" (4 stops) → blue zone "Arquitecto" (4 stops) → green zone "Desarrollador" (1 stop) → pink zone "Consultor" (2 stops)
+- Zone labels floating above each colored section
+- Stop 3 "Sesiones de consultoría" shows "Gemini" in small italic below
+- Drawer below shows "Pasa el cursor…" default message
+- Drawer has no interaction yet (hover does nothing)
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: slide 7 journey map — timeline layout with color zones"
+```
+
+---
+
+## Task 5: Slide 7 — Hover interaction + animated drawer
+
+**Files:**
+- Modify: `index.html`
+
+- [ ] **Step 1: Add drawer interaction functions**
+
+In the `<script>` block, after `renderJourneyTrack()`, add:
+
+```js
+    /* ==================== JOURNEY DRAWER INTERACTION ==================== */
+    let drawerHideTimeout = null;
+
+    function showDrawer(stop) {
+      clearTimeout(drawerHideTimeout);
+
+      const drawer    = document.getElementById('journey-drawer');
+      const defaultEl = drawer.querySelector('.drawer-default');
+      const contentEl = drawer.querySelector('.drawer-content');
+      const colors    = stop.agent ? AGENT_COLORS[stop.agent] : { text: 'rgba(255,255,255,.45)', border: 'rgba(255,255,255,.15)' };
+
+      document.getElementById('drawer-num').textContent   = String(stop.id).padStart(2, '0');
+      document.getElementById('drawer-title').textContent = stop.label;
+      document.getElementById('drawer-body').textContent  = stop.description;
+
+      const agentEl = document.getElementById('drawer-agent');
+      agentEl.style.color = colors.text;
+      agentEl.textContent = stop.agentLabel;
+
+      const linkEl = document.getElementById('drawer-link');
+      if (stop.videoUrl) {
+        linkEl.style.display  = 'flex';
+        linkEl.style.color    = colors.text;
+        linkEl.textContent    = '▶ Ver demo';
+        linkEl.onclick        = () => window.open(stop.videoUrl, '_blank');
+      } else if (stop.description.startsWith('[PENDIENTE')) {
+        linkEl.style.display  = 'block';
+        linkEl.style.color    = '#2a2a2a';
+        linkEl.textContent    = '[PENDIENTE: enlace vídeo]';
+        linkEl.onclick        = null;
+      } else {
+        linkEl.style.display  = 'none';
+      }
+
+      drawer.style.borderColor = colors.border || 'rgba(255,126,255,.25)';
+      drawer.classList.add('has-content');
+      defaultEl.style.display = 'none';
+      contentEl.style.display = 'flex';
+
+      gsap.fromTo(contentEl,
+        { opacity: 0, y: 6 },
+        { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' }
+      );
+
+      document.querySelectorAll('.journey-stop').forEach(s => s.classList.remove('is-active'));
+      const activeEl = document.querySelector(`.journey-stop[data-stop-id="${stop.id}"]`);
+      if (activeEl) activeEl.classList.add('is-active');
+    }
+
+    function hideDrawer() {
+      drawerHideTimeout = setTimeout(() => {
+        const drawer    = document.getElementById('journey-drawer');
+        const defaultEl = drawer.querySelector('.drawer-default');
+        const contentEl = drawer.querySelector('.drawer-content');
+
+        gsap.to(contentEl, {
+          opacity: 0, y: 4, duration: 0.15, ease: 'power2.in',
+          onComplete: () => {
+            contentEl.style.display  = 'none';
+            defaultEl.style.display  = 'block';
+            drawer.style.borderColor = 'var(--surface-border)';
+            drawer.classList.remove('has-content');
+            document.querySelectorAll('.journey-stop').forEach(s => s.classList.remove('is-active'));
+          }
+        });
+      }, 80);
+    }
+```
+
+- [ ] **Step 2: Attach hover listeners in `createStopEl()`**
+
+In the `createStopEl` function, add these two lines just before `return el;`:
+
+```js
+      el.addEventListener('mouseenter', () => showDrawer(stop));
+      el.addEventListener('mouseleave', () => hideDrawer());
+```
+
+- [ ] **Step 3: Verify hover interaction**
+
+Reload and navigate to slide 7.
+Expected:
+- Hovering over any stop: circle gets a glow ring, drawer animates in with stop details
+- Stop shows: number (large dim), agent label in its color, title, placeholder description, placeholder video link in very dim color
+- Moving mouse from one stop to another without leaving the track: drawer updates smoothly (no flicker — the 80ms delay prevents it)
+- Moving mouse off all stops: drawer fades out, default message returns
+- Stop 1 (no agent): drawer shows "Inicio" label in dim white
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: slide 7 hover interaction — animated drawer with placeholder content"
+```
+
+---
+
+## Task 6: Slides 8, 9, 10 + finalize TOTAL_SLIDES
+
+**Files:**
+- Modify: `index.html`
+
+- [ ] **Step 1: Add Slide 8 — Demo placeholder**
+
+After `#slide-07`:
+
+```html
+    <!-- SLIDE 08: DEMO UATs — PLACEHOLDER -->
+    <div class="slide" id="slide-08">
+      <div class="content-top">
+        <div class="section-tag" data-a>Demo en vivo</div>
+        <div class="slide-title" data-a>Automatización<br>de <em>UATs</em></div>
+      </div>
+      <div class="demo-placeholder" data-a>
+        <div class="demo-placeholder-label">Demo en vivo · ≈ 5 min</div>
+        <div class="demo-placeholder-hint">[Esta slide se diseñará en una iteración posterior]</div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">08 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+```
+
+- [ ] **Step 2: Add Slide 9 — Visión a futuro**
+
+```html
+    <!-- SLIDE 09: VISIÓN A FUTURO -->
+    <div class="slide" id="slide-09">
+      <div class="content-top">
+        <div class="section-tag" data-a>Lo que viene</div>
+        <div class="slide-title" data-a>Visión<br>a <em>futuro</em></div>
+      </div>
+      <div class="content-body">
+        <div class="three-col" data-a>
+          <div class="col-block">
+            <div class="col-block-title">Nuevas líneas de trabajo</div>
+            <ul>
+              <li>Agente de <strong>SMC</strong> — Support & Maintenance</li>
+              <li>Agente de <strong>auditorías</strong> — acelerando el proceso estándar en clientes con Salesforce activo</li>
+            </ul>
+          </div>
+          <div class="col-block">
+            <div class="col-block-title">Gobernanza</div>
+            <ul>
+              <li>IT gobierna las herramientas</li>
+              <li>Connect mantiene y evoluciona los agentes</li>
+              <li>Medición de adopción, consumo e impacto</li>
+            </ul>
+          </div>
+          <div class="col-block">
+            <div class="col-block-title">Mantenernos AI-Ready</div>
+            <ul>
+              <li>Rediseño de perfiles técnicos</li>
+              <li>Evolución continua y nuevos paradigmas</li>
+              <li>La industria va a cambiar. Nuestra apuesta es estar siempre listos.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="accent-line" data-a>"No es un proyecto. Es la forma en que trabajamos."</div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">09 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+```
+
+- [ ] **Step 3: Add Slide 10 — Gracias**
+
+```html
+    <!-- SLIDE 10: GRACIAS -->
+    <div class="slide" id="slide-10">
+      <div class="cierre-glow"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;" data-a>
+        <div class="cierre-quote">Gracias.</div>
+        <div class="cierre-credits">Gonzalo · Enric · Borja<br>Studio Connect · WAM Global</div>
+      </div>
+      <div class="cierre-wam" data-a>
+        <svg style="height:22px;width:auto;display:block;" viewBox="0 0 616.94 183.34" xmlns="http://www.w3.org/2000/svg">
+          <path d="M248.48,183.34L292.23,0h64.96l43.75,183.34h-36.15l-8.91-39.28h-62.34l-8.9,39.28h-36.16ZM300.87,111.05h47.42l-21.22-93.76h-4.72l-21.48,93.76ZM.16,10.47c-.89,37.86-2.99,126.53,30.25,160.47,9.32,9.51,20.6,14.32,33.54,14.32h.16c16.7-.05,32.53-10.52,45.8-29.94,15.22,19.48,32.97,29.94,51.4,29.94,13.72,0,25.65-5.07,35.44-15.06,29.65-30.28,32.33-97.64,31.02-159.54-.09-4.34-.16-7.96-.16-10.66h-23.21c0,2.83.08,6.63.18,11.15.67,31.57,2.43,115.42-24.41,142.82-5.41,5.52-11.4,8.1-18.85,8.1-13.03,0-26.88-10.52-38.96-29.27,11.25-25.06,18.16-55.99,18.12-81.54-.02-14.71-2.29-26.76-6.74-35.81-5.96-12.12-15.92-18.78-28.07-18.78-11.47,0-20.91,5.97-26.61,16.8-4.29,8.16-6.46,19.04-6.46,32.31,0,27.03,8.93,60.63,23.29,87.68.04.06.08.14.11.2-9.92,17.9-21.55,28.35-31.96,28.39h-.09c-6.65,0-12.03-2.34-16.95-7.36C20.61,127.75,22.61,42.95,23.36,11.02c.11-4.61.2-8.27.2-11.03H.35c0,2.48-.09,6.02-.19,10.49ZM95.82,45.78c0-4.33.48-25.9,9.86-25.9,8.51,0,11.57,16.92,11.58,31.41.03,16.53-3.28,35.68-9,53.5-7.75-19.73-12.44-41.4-12.44-58.99h0ZM616.94.77l-.76,4.07c-1.53,5.77-2.68,11.15-3.44,16.15-.76,5-1.15,10.29-1.15,15.89v109.34c0,5.6.38,10.89,1.15,15.89.76,5,1.91,10.39,3.44,16.15l.76,4.07v1.01h-38.4v-1.01l.76-4.07c1.36-5.76,2.46-11.15,3.3-16.15.84-5,1.27-10.3,1.27-15.89V28.57l-59.24,154.77h-13.98l-60.03-154.38c-.18,2.56-.27,5.2-.27,7.92v95.1c0,7.63.81,15.13,2.42,22.5,1.61,7.37,3.69,14.79,6.23,22.24.34,1.01.67,1.96,1.02,2.8.34.86.59,1.7.76,2.54v1.27h-31.27v-1.27c.17-.84.42-1.7.76-2.54.34-.84.67-1.78,1.02-2.8,2.37-7.46,4.41-14.87,6.1-22.24,1.7-7.38,2.54-14.88,2.54-22.5V36.88c0-9.67-2.2-20.34-6.61-32.04l-1.53-3.81V.27h7.67,0s28.73-.01,28.73-.01l58.35,149.37L583.87.03v-.03h33.07v.77Z" fill="#FFFFFF" opacity=".3"/>
+        </svg>
+      </div>
+      <div class="slide-footer" style="position:absolute;bottom:var(--slide-pad-y);left:var(--slide-pad-x);right:var(--slide-pad-x);" data-a>
+        <div class="slide-num">10 / 10</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+```
+
+- [ ] **Step 4: Update `TOTAL_SLIDES` to 10**
+
+```js
+const TOTAL_SLIDES = 10;
+```
+
+- [ ] **Step 5: Final browser verification — full run-through**
+
+Reload `index.html`. Run through all 10 slides with arrow keys:
+
+| Slide | Check |
+|-------|-------|
+| 01 | Cover glow + breathing animation, WAM logo, title "IA con *criterio*" |
+| 02 | 3 cards + accent-line |
+| 03 | 3 numbered steps |
+| 04 | 3 cards + accent-line |
+| 05 | 4-step recipe flow + accent-line |
+| 06 | 3 cards + descriptive footer text |
+| 07 | Full-width timeline, 5 color zones, hover opens drawer with placeholder content |
+| 08 | Dashed placeholder box with "Demo en vivo · ≈ 5 min" |
+| 09 | 3 col-blocks + accent-line |
+| 10 | Centered "Gracias." + credits + glow + faded WAM logo |
+| All | 10 progress dots at bottom, active dot highlights correctly |
+| All | Space bar advances, left arrow goes back |
+| All | Each slide content fades in with stagger on enter |
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: complete presentation — slides 8-10, all 10 slides wired up"
+```
