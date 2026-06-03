@@ -99,7 +99,7 @@
 
     /* ==================== SECTION TAG ==================== */
     .section-tag {
-      font-size: 10px; font-weight: 500; letter-spacing: 3px;
+      font-size: 12px; font-weight: 500; letter-spacing: 3px;
       text-transform: uppercase; color: var(--accent);
       display: flex; align-items: center; gap: 12px;
     }
@@ -112,7 +112,7 @@
     /* ==================== SLIDE TITLE ==================== */
     .slide-title {
       font-family: var(--font-title);
-      font-size: 54px; font-weight: 400;
+      font-size: 62px; font-weight: 400;
       line-height: 1.1; letter-spacing: -0.5px; color: var(--text);
     }
     .slide-title em { font-style: italic; color: var(--accent); }
@@ -145,14 +145,14 @@
       transition: transform .2s ease, border-color .2s ease; cursor: default;
     }
     .card:hover { transform: translateY(-3px); border-color: rgba(255,126,255,.3); }
-    .card-eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
-    .card-title  { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
-    .card-body   { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+    .card-eyebrow { font-size: 12px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    .card-title  { font-size: 19px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+    .card-body   { font-size: 17px; color: darkgrey; line-height: 1.65; }
 
     /* ==================== ACCENT LINE ==================== */
     .accent-line {
       font-family: var(--font-title); font-style: italic;
-      font-size: 18px; color: var(--accent);
+      font-size: 22px; color: var(--accent);
       border-left: 2px solid var(--accent);
       padding-left: 16px; line-height: 1.4;
     }
@@ -167,8 +167,8 @@
     }
     .setup-step:hover { border-color: rgba(255,126,255,.3); }
     .step-num { font-family: var(--font-title); font-style: italic; font-size: 32px; color: var(--accent); line-height: 1; flex-shrink: 0; width: 32px; }
-    .step-content-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
-    .step-content-body  { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .step-content-title { font-size: 19px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .step-content-body  { font-size: 17px; color: darkgrey; line-height: 1.6; }
 
     /* ==================== THREE-COL / COL-BLOCK ==================== */
     .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
@@ -176,45 +176,67 @@
       background: var(--surface); border: 1px solid var(--surface-border);
       border-radius: 12px; padding: 24px;
     }
-    .col-block-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
+    .col-block-title { font-size: 19px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
     .col-block ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .col-block ul li { font-size: 14px; color: var(--text-muted); line-height: 1.5; padding-left: 14px; position: relative; }
+    .col-block ul li { font-size: 17px; color: var(--text-muted); line-height: 1.5; padding-left: 14px; position: relative; }
     .col-block ul li::before { content: '–'; position: absolute; left: 0; color: var(--accent); }
 
     /* ==================== RECIPE FLOW (slide 5) ==================== */
     .recipe-flow {
-      display: flex; align-items: center; gap: 12px; margin: 8px 0 16px;
+      display: flex; align-items: stretch; gap: 12px; margin: 8px 0 16px;
+    }
+    .recipe-step-wrapper { display: flex; flex-direction: column; flex: 1; }
+    .recipe-top-bracket {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0 20px; margin-bottom: 28px; flex: 1; justify-content: flex-end;
+    }
+    .recipe-top-bracket-name {
+      font-size: 16px; font-family: var(--font-title); font-style: italic;
+      color: var(--accent); opacity: 0.75;
+      margin-bottom: 8px;
+    }
+    .recipe-top-bracket-line {
+      width: 100%; height: 9px;
+      border: 2px solid var(--accent); border-bottom: none;
+      border-radius: 6px 6px 0 0; opacity: 0.45;
+      position: relative;
+    }
+    .recipe-top-bracket-line::after {
+      content: ''; position: absolute;
+      bottom: -22px; left: 50%; transform: translateX(-50%);
+      width: 2px; height: 22px;
+      background: var(--accent); opacity: 1;
     }
     .recipe-step {
       background: var(--surface); border: 1px solid var(--surface-border);
-      border-radius: 10px; padding: 14px 20px; flex: 1; text-align: center;
+      border-radius: 10px; padding: 14px 20px; text-align: center;
     }
     .recipe-step-icon  { font-size: 20px; line-height: 1; display: block; margin-bottom: 6px; }
-    .recipe-step-label { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
-    .recipe-step-desc  { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-    .recipe-arrow      { color: var(--text-dim); font-size: 18px; flex-shrink: 0; }
+    .recipe-step-label { font-size: 14px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+    .recipe-step-desc  { font-size: 18px; color: darkgrey; line-height: 1.5; }
+    .recipe-arrow      { color: var(--text-dim); font-size: 18px; flex-shrink: 0; display: flex; align-items: center; }
 
     /* ==================== JOURNEY MAP (slide 7) ==================== */
     .journey-track {
-      display: flex; align-items: stretch;
-      gap: 8px; width: 100%;
-      margin-top: 4px;
+      display: flex; align-items: center;
+      gap: 8px; width: 100%; max-width: 1600px; align-self: center;
+      margin-top: 4px; padding-bottom: 52px;
     }
     .journey-start-stop {
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center;
       gap: 6px; padding: 4px 8px; flex-shrink: 0;
     }
     .zone-wrapper {
-      display: flex; flex-direction: column; flex: 1; gap: 14px;
+      position: relative; flex: 1;
     }
     .journey-zone {
       display: flex; align-items: center;
-      padding: 22px 10px 10px; border-radius: 12px;
-      position: relative;
+      padding: 30px 10px 18px; border-radius: 12px;
+      position: relative; width: 100%;
       border: 1px solid transparent;
     }
     .zone-bracket {
+      position: absolute; top: calc(100% + 10px); left: 0; right: 0;
       display: flex; flex-direction: column; align-items: center;
       padding: 0 20px;
     }
@@ -259,14 +281,14 @@
     .journey-stop-label {
       font-size: 13px; color: #fff; text-align: center;
       line-height: 1.35; max-width: 110px;
-      height: 42px; overflow: hidden;
+      overflow: hidden;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     }
     .journey-stop.is-pinned .journey-stop-circle {
       box-shadow: 0 0 0 3px var(--stop-color, var(--accent)),
                   0 0 14px var(--stop-color, var(--accent));
     }
-    .journey-arrow { color: #2a2a2a; font-size: 16px; flex-shrink: 0; display: flex; align-items: center; }
+    .journey-arrow { color: #2a2a2a; font-size: 16px; flex-shrink: 0; }
     .journey-drawer {
       border: 1px solid var(--surface-border);
       border-radius: 12px; padding: 16px 24px;
@@ -318,6 +340,49 @@
     }
     .demo-placeholder-hint { font-size: 13px; color: #222; }
 
+    /* ==================== AGENT FEATURE TREES (slide 6) ==================== */
+    .agent-col { display: flex; flex-direction: column; }
+
+    /* Design A — Tree connector lines */
+    .feat-tree { margin-top: 12px; padding-left: 2px; --tree-c: rgba(255,126,255,.65); }
+    .feat-tree-item {
+      font-size: 16px; color: darkgrey;
+      padding: 6px 0 6px 20px;
+      border-left: 2px solid var(--tree-c);
+      position: relative;
+    }
+    .feat-tree-item::before {
+      content: ''; position: absolute;
+      left: -2px; top: calc(50% - 1px);
+      width: 16px; height: 2px;
+      background: var(--tree-c);
+    }
+    .feat-tree-item:last-child { border-left-color: transparent; }
+    .feat-tree-item:last-child::after {
+      content: ''; position: absolute;
+      left: -2px; top: 0; bottom: 50%;
+      width: 2px; background: var(--tree-c);
+    }
+
+    /* Design B — Pill tags (Arquitecto) */
+    .feat-pills { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 7px; }
+    .feat-pill {
+      font-size: 12px; font-weight: 500;
+      border: 1px solid rgba(100,180,255,.35);
+      border-radius: 20px; padding: 4px 12px;
+      color: rgba(100,180,255,.8);
+      background: rgba(100,180,255,.07);
+    }
+
+    /* Design C — Numbered list (Desarrollador) */
+    .feat-steps { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .feat-step { display: flex; align-items: baseline; gap: 10px; font-size: 13px; color: darkgrey; }
+    .feat-step-n {
+      font-family: var(--font-title); font-style: italic;
+      font-size: 20px; color: rgba(80,240,160,.6);
+      flex-shrink: 0; min-width: 28px; line-height: 1;
+    }
+
     /* ==================== CLOSING SLIDE (slide 10) ==================== */
     #slide-10 { overflow: hidden; align-items: center; justify-content: center; text-align: center; }
     .cierre-glow {
@@ -331,7 +396,7 @@
       font-size: clamp(32px,5vw,60px);
       line-height: 1.2; color: var(--text); max-width: 600px; margin-bottom: 16px;
     }
-    .cierre-credits { font-size: 13px; color: var(--text-dim); letter-spacing: 1px; }
+    .cierre-credits { font-size: 16px; color: var(--text-dim); letter-spacing: 1px; }
     .cierre-wam {
       position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
       display: flex; align-items: center; gap: 8px; opacity: .3;
@@ -367,8 +432,8 @@
       color: var(--text); will-change: transform;
     }
     #cover-title em { font-style: italic; color: var(--accent); }
-    .cover-eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
-    .cover-meta    { font-size: 11px; color: var(--text-dim); letter-spacing: .5px; }
+    .cover-eyebrow { font-size: 13px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+    .cover-meta    { font-size: 14px; color: darkgrey; letter-spacing: .5px; }
   </style>
 </head>
 <body>
@@ -388,12 +453,12 @@
       <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
         <div class="cover-eyebrow" data-a> WAM Global</div>
         <div id="cover-title" data-a>IA con <em>criterio</em></div>
-        <div style="margin-top:20px;font-size:16px;color:var(--text-muted);" data-a>
+        <div style="margin-top:20px;font-size:20px;color:darkgrey;" data-a>
           Cómo el Studio de Connect ha rediseñado<br>el delivery de proyectos Salesforce con IA.
         </div>
       </div>
       <div class="slide-footer" data-a>
-        <div class="cover-meta">Gonzalo Quevedo · Enric Mora · Borja González — Connect</div>
+        <div class="cover-meta">Equipo Connect</div>
         <div class="nav-hint">
           <span class="nav-key">←</span><span class="nav-key">→</span>
           <span style="font-size:10px;color:var(--text-dim);margin-left:4px;">navegar</span>
@@ -512,31 +577,55 @@
       </div>
       <div class="content-body">
         <div class="recipe-flow" data-a>
-          <div class="recipe-step">
-            <span class="recipe-step-icon">📋</span>
-            <div class="recipe-step-label">Skill = Receta</div>
-            <div class="recipe-step-desc">El conocimiento de WAM, escrito en lenguaje natural. La receta es nuestra.</div>
+          <div class="recipe-step-wrapper">
+            <div class="recipe-top-bracket">
+              <div class="recipe-top-bracket-name">Receta</div>
+              <div class="recipe-top-bracket-line"></div>
+            </div>
+            <div class="recipe-step">
+              <span class="recipe-step-icon">📋</span>
+              <div class="recipe-step-label">Skill</div>
+              <div class="recipe-step-desc">El conocimiento de WAM codificado en lenguaje natural. La receta es nuestra.</div>
+            </div>
           </div>
           <div class="recipe-arrow">→</div>
-          <div class="recipe-step">
-            <span class="recipe-step-icon">🔧</span>
-            <div class="recipe-step-label">MCPs = Instrumentos</div>
-            <div class="recipe-step-desc">Confluence, JIRA, Salesforce, GitHub, Lucid. Estándares del proveedor.</div>
+          <div class="recipe-step-wrapper">
+            <div class="recipe-top-bracket">
+              <div class="recipe-top-bracket-name">Instrumentos</div>
+              <div class="recipe-top-bracket-line"></div>
+            </div>
+            <div class="recipe-step">
+              <span class="recipe-step-icon">🔧</span>
+              <div class="recipe-step-label">MCPs</div>
+              <div class="recipe-step-desc">Conectamos las herramientas, sin necesidad de "copy/paste".</div>
+            </div>
           </div>
           <div class="recipe-arrow">→</div>
-          <div class="recipe-step">
-            <span class="recipe-step-icon">📄</span>
-            <div class="recipe-step-label">Ingredientes = Proyecto</div>
-            <div class="recipe-step-desc">Transcripciones, documentación, reuniones. La materia prima de cada engagement.</div>
+          <div class="recipe-step-wrapper">
+            <div class="recipe-top-bracket">
+              <div class="recipe-top-bracket-name">Ingredientes</div>
+              <div class="recipe-top-bracket-line"></div>
+            </div>
+            <div class="recipe-step">
+              <span class="recipe-step-icon">📄</span>
+              <div class="recipe-step-label">Proyecto</div>
+              <div class="recipe-step-desc">Transcripciones, documentación y reuniones del cliente.</div>
+            </div>
           </div>
           <div class="recipe-arrow">→</div>
-          <div class="recipe-step">
-            <span class="recipe-step-icon">✅</span>
-            <div class="recipe-step-label">Agente = Cocinero</div>
-            <div class="recipe-step-desc">Combina todo y sirve el plato: los entregables del proyecto.</div>
+          <div class="recipe-step-wrapper">
+            <div class="recipe-top-bracket">
+              <div class="recipe-top-bracket-name">Cocinero</div>
+              <div class="recipe-top-bracket-line"></div>
+            </div>
+            <div class="recipe-step">
+              <span class="recipe-step-icon">✅</span>
+              <div class="recipe-step-label">Agente</div>
+              <div class="recipe-step-desc">Combina todo y sirve el plato: los entregables finales del proyecto.</div>
+            </div>
           </div>
         </div>
-        <div class="accent-line" data-a>"Construido con Claude Code por ser lo mejor, pero sobre estándares: ya probamos Antigravity como respaldo. No hay dependencia de proveedor."</div>
+        <div class="accent-line" data-a>"El modelo es agnóstico: funciona con Claude Code y GitHub Copilot, probado con Antigravity como respaldo. Sin dependencia de proveedor."</div>
       </div>
       <div class="slide-footer" data-a>
         <div class="slide-num">05 / 10</div>
@@ -552,23 +641,56 @@
       </div>
       <div class="content-body" style="gap:16px;">
         <div class="cards-3" data-a>
-          <div class="card">
-            <div class="card-eyebrow">Agente Consultor</div>
-            <div class="card-title">Del kickoff al documento funcional</div>
-            <div class="card-body">Prepara kickoffs y guiones de sesión, diseña la solución funcional, redacta el documento funcional oficial y define las UATs. El más exportable a otros Studios.</div>
+
+          <!-- Consultor — Design A: Tree connector lines -->
+          <div class="agent-col">
+            <div class="card">
+              <div class="card-eyebrow">Agente Consultor</div>
+              <div class="card-title">Del kickoff al documento funcional</div>
+              <div class="card-body">Prepara kickoffs y guiones de sesión, diseña la solución funcional, redacta el documento funcional oficial y define las UATs.</div>
+            </div>
+            <div class="feat-tree">
+              <div class="feat-tree-item">Kickoffs y guiones de sesión</div>
+              <div class="feat-tree-item">Sesiones de consultoría</div>
+              <div class="feat-tree-item">Diseño de solución funcional</div>
+              <div class="feat-tree-item">Documento funcional oficial</div>
+              <div class="feat-tree-item">Definición y ejecución de UATs</div>
+            </div>
           </div>
-          <div class="card">
-            <div class="card-eyebrow">Agente Arquitecto</div>
-            <div class="card-title">De lo funcional a la especificación técnica</div>
-            <div class="card-body">Convierte el documento funcional en análisis técnico, modelo de datos, inventario y desglose de tareas de implementación.</div>
+
+          <!-- Arquitecto — Design A: Tree connector lines -->
+          <div class="agent-col">
+            <div class="card">
+              <div class="card-eyebrow">Agente Arquitecto</div>
+              <div class="card-title">De lo funcional a la especificación técnica</div>
+              <div class="card-body">Convierte el documento funcional en análisis técnico, modelo de datos, inventario y desglose de tareas.</div>
+            </div>
+            <div class="feat-tree">
+              <div class="feat-tree-item">Análisis doc. funcional · ADRs</div>
+              <div class="feat-tree-item">Modelo de datos · Lucidchart</div>
+              <div class="feat-tree-item">Inventario técnico · UML</div>
+              <div class="feat-tree-item">Desglose de tareas · Jira</div>
+            </div>
           </div>
-          <div class="card">
-            <div class="card-eyebrow">Agente Desarrollador</div>
-            <div class="card-title">Asistencia en la ejecución</div>
-            <div class="card-body">Asiste en la ejecución tarea a tarea de la implementación técnica.</div>
+
+          <!-- Desarrollador — Design A: Tree connector lines -->
+          <div class="agent-col">
+            <div class="card">
+              <div class="card-eyebrow">Agente Desarrollador</div>
+              <div class="card-title">Asistencia en la ejecución</div>
+              <div class="card-body">Asiste en la ejecución tarea a tarea de la implementación técnica con un procedimiento de análisis, presentación del plan y ejecución.</div>
+            </div>
+            <div class="feat-tree">
+              <div class="feat-tree-item">Recepción de tarea Jira</div>
+              <div class="feat-tree-item">Análisis y plan de implementación</div>
+              <div class="feat-tree-item">Ejecución sobre el repositorio</div>
+              <div class="feat-tree-item">Despliegue en org Salesforce</div>
+              <div class="feat-tree-item">Actualización de estado en Jira</div>
+            </div>
           </div>
+
         </div>
-        <div style="font-size:13px; color:var(--text-muted); line-height:1.7; border-left: 2px solid var(--surface-border); padding-left:16px;" data-a>
+        <div style="font-size:13px; color:darkgrey; line-height:1.7; border-left: 2px solid var(--surface-border); padding-left:16px; margin-top:auto;" data-a>
           Son <strong style="color:var(--text)">entidades vivas</strong>: los equipos de Connect las evolucionan de forma autónoma (proceso de Lessons Learnt). Toda la documentación vive en un <strong style="color:var(--text)">Confluence compartido</strong>. Las skills se escriben en <strong style="color:var(--text)">lenguaje natural</strong> — cualquier perfil puede evolucionarlas. No es artesanía de tres personas; es una capacidad de empresa.
         </div>
       </div>
@@ -973,7 +1095,8 @@
         if (group.agent === null) {
           const stop = STOPS[group.stops[0]];
           const el = createStopEl(stop);
-          el.style.flexShrink = '0';
+          el.style.flex = 'none';
+          el.style.width = '100px';
           track.appendChild(el);
         } else {
           const colors = AGENT_COLORS[group.agent];
