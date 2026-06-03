@@ -140,11 +140,12 @@
     }
 
     /* ==================== CARDS ==================== */
-    .cards-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .cards-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; align-items: stretch; }
     .card {
       background: var(--surface); border: 1px solid var(--surface-border);
       border-radius: 12px; padding: 24px;
       transition: transform .2s ease, border-color .2s ease; cursor: default;
+      display: flex; flex-direction: column;
     }
     .card:hover { transform: translateY(-3px); border-color: rgba(255,126,255,.3); }
     .card-eyebrow { font-size: 12px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
@@ -173,7 +174,7 @@
     .step-content-body  { font-size: 17px; color: darkgrey; line-height: 1.6; }
 
     /* ==================== THREE-COL / COL-BLOCK ==================== */
-    .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; align-items: stretch; }
     .col-block {
       background: var(--surface); border: 1px solid var(--surface-border);
       border-radius: 12px; padding: 24px;
@@ -266,11 +267,11 @@
     }
     .orch-node {
       background: var(--surface); border: 1px solid var(--surface-border);
-      border-radius: 10px; padding: 10px 24px; text-align: center;
+      border-radius: 10px; padding: clamp(6px,0.8vh,10px) clamp(14px,1.5vw,24px); text-align: center;
       transition: border-color .2s;
     }
     .orch-node:hover { border-color: rgba(255,126,255,.3); }
-    .orch-node-icon { font-size: 18px; margin-bottom: 3px; display: block; }
+    .orch-node-icon { font-size: clamp(13px,1.5vh,18px); margin-bottom: 3px; display: block; }
     .orch-node-label {
       font-size: 13px; font-weight: 600; letter-spacing: 1.5px;
       text-transform: uppercase; margin-bottom: 2px;
@@ -337,8 +338,8 @@
     /* Fan column (right side of green container) */
     .orch-fan-col { flex: 1; display: flex; align-items: center; justify-content: center; }
     /* Task rows */
-    .orch-task-row  { display: flex; align-items: center; gap: 6px; font-size: 15px; color: var(--text-muted); padding: 3px 0; }
-    .orch-task-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
+    .orch-task-row  { display: flex; align-items: center; gap: 6px; font-size: clamp(11px,1.3vh,15px); color: var(--text-muted); padding: 2px 0; }
+    .orch-task-icon { font-size: clamp(11px,1.3vh,15px); flex-shrink: 0; line-height: 1; }
     /* Full-width tree */
     .orch-tree {
       display: flex; flex-direction: column; gap: 0; align-items: center;
@@ -890,8 +891,8 @@
         <div class="section-tag" data-a>UATs con IA</div>
         <div class="slide-title" data-a>De pruebas manuales<br>a <em>sistema autónomo</em></div>
       </div>
-      <div class="content-body" style="gap:10px;justify-content:flex-start;">
-        <div class="orch-tree" data-a>
+      <div class="content-body" style="gap:10px;justify-content:flex-start;overflow:visible;">
+        <div class="orch-tree" data-a id="orch-tree-diagram">
           <!-- Input -->
           <div class="orch-row">
             <div class="orch-node orch-node--input" style="min-width:240px;">
@@ -920,12 +921,9 @@
                 <!-- Left: lifecycle tasks for each agent -->
                 <div class="orch-task-col">
                   <div class="orch-task-row"><span class="orch-task-icon">📦</span>Prepara los datos</div>
-                  <div class="orch-task-row"><span class="orch-task-icon">🔑</span>Inicia sesión</div>
                   <div class="orch-task-row"><span class="orch-task-icon">🔍</span>Explora el sistema real</div>
                   <div class="orch-task-row"><span class="orch-task-icon">✍️</span>Escribe la prueba</div>
-                  <div class="orch-task-row"><span class="orch-task-icon">▶️</span>Ejecuta y valida</div>
-                  <div class="orch-task-row"><span class="orch-task-icon">📸</span>Captura evidencia</div>
-                  <div class="orch-task-row"><span class="orch-task-icon">🧹</span>Limpia los datos</div>
+                  <div class="orch-task-row"><span class="orch-task-icon">▶️</span>Ejecuta, valida y registra</div>
                 </div>
                 <div class="orch-vsep orch-vsep--green"></div>
                 <!-- Right: agent fan -->
@@ -1001,56 +999,22 @@
         <div class="section-tag" data-a>Más allá de las UATs</div>
         <div class="slide-title" data-a>De pruebas puntuales<br>a <em>calidad continua</em></div>
       </div>
-      <div class="content-body" style="gap:12px;justify-content:flex-start;">
-        <div style="display:flex;flex-direction:column;gap:4px;align-items:center;" data-a>
-          <div class="ci-loop">
-            <div class="ci-loop-step">
-              <span class="ci-loop-step-icon">💻</span>
-              <div class="ci-loop-step-label">Desarrollo</div>
-            </div>
-            <div class="ci-loop-arrow">→</div>
-            <div class="ci-loop-step">
-              <span class="ci-loop-step-icon">🔒</span>
-              <div class="ci-loop-step-label">Validación automática</div>
-            </div>
-            <div class="ci-loop-arrow">→</div>
-            <div class="ci-loop-step">
-              <span class="ci-loop-step-icon">🚀</span>
-              <div class="ci-loop-step-label">Entrega</div>
-            </div>
-            <div class="ci-loop-arrow">→</div>
-            <div class="ci-loop-step">
-              <span class="ci-loop-step-icon">🔄</span>
-              <div class="ci-loop-step-label">Regresión</div>
-            </div>
-            <div class="ci-loop-arrow">→</div>
-            <div class="ci-loop-step">
-              <span class="ci-loop-step-icon">📊</span>
-              <div class="ci-loop-step-label">Panel de resultados</div>
-            </div>
-          </div>
-          <div class="ci-loop-return">
-            <div class="ci-loop-return-line"></div>
-            <div class="ci-loop-return-label">Ciclo continuo</div>
-            <div class="ci-loop-return-line"></div>
-          </div>
-        </div>
-
+      <div class="content-body">
         <div class="cards-3" data-a>
           <div class="card">
             <div class="card-eyebrow">Antes de integrar</div>
             <div class="card-title">Cada cambio se valida antes de incorporarlo</div>
-            <div class="card-body">Cuando un desarrollador propone un cambio, el equipo puede lanzar las pruebas con un solo comando. Si las pruebas no pasan, el cambio no se integra. Se acabó descubrir problemas después de la entrega.</div>
+            <div class="card-body">Un comando lanza todas las pruebas. Si no pasan, el cambio no entra. Se acabó descubrir problemas tras la entrega.</div>
           </div>
           <div class="card">
-            <div class="card-eyebrow">Después de cada entrega</div>
-            <div class="card-title">Regresión automática en cada despliegue</div>
-            <div class="card-body">Tras cada entrega exitosa a cualquier entorno, se ejecutan automáticamente las pruebas de los módulos afectados más una verificación general. Si algo que funcionaba deja de funcionar, el equipo lo sabe al momento.</div>
+            <div class="card-eyebrow">Después de cada despliegue</div>
+            <div class="card-title">Regresión automática en cada entrega</div>
+            <div class="card-body">Cada despliegue ejecuta las pruebas de los módulos afectados. Si algo que funcionaba se rompe, el equipo lo sabe al momento.</div>
           </div>
           <div class="card">
             <div class="card-eyebrow">Visibilidad</div>
-            <div class="card-title">Un panel con el histórico de todas las ejecuciones</div>
-            <div class="card-body">Cada ejecución publica su informe de resultados y el report de evidencia en un panel accesible para todo el equipo. Con fecha, entorno, y enlace directo al detalle. Trazabilidad completa.</div>
+            <div class="card-title">Histórico completo de ejecuciones</div>
+            <div class="card-body">Cada ejecución publica su informe con capturas en un panel compartido. Fecha, entorno y enlace al detalle. Trazabilidad total.</div>
           </div>
         </div>
         <div class="accent-line" data-a>"Las UATs dejan de ser un hito puntual. Se convierten en una red de seguridad permanente."</div>
@@ -1526,6 +1490,24 @@
     scalePresentation();
     window.addEventListener('resize', scalePresentation);
 
+    // Scale orch diagram to always fit its container without scrolling
+    function fitOrchDiagram() {
+      const tree = document.getElementById('orch-tree-diagram');
+      if (!tree) return;
+      const container = tree.parentElement;
+      tree.style.transform = 'scale(1)';
+      tree.style.transformOrigin = 'top center';
+      const availH = container.clientHeight;
+      const availW = container.clientWidth;
+      const naturalH = tree.scrollHeight;
+      const naturalW = tree.scrollWidth;
+      const scale = Math.min(1, availH / naturalH, availW / naturalW);
+      tree.style.transform = `scale(${scale})`;
+      // Collapse the layout space to the scaled height so flex doesn't leave a gap
+      tree.style.marginBottom = `${(naturalH * scale - naturalH)}px`;
+    }
+    window.addEventListener('resize', fitOrchDiagram);
+
     function init() {
       renderJourneyTrack();
       buildProgress();
@@ -1539,6 +1521,7 @@
       document.fonts.ready.then(() => {
         const els = slides[0] ? slides[0].querySelectorAll('[data-a]') : [];
         if (els.length) gsap.fromTo(els, { opacity: 0 }, { opacity: 1, duration: 0.45, stagger: 0.12, ease: 'power2.out', clearProps: 'opacity' });
+        fitOrchDiagram();
       });
     }
     init();
