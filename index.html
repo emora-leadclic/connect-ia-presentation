@@ -196,19 +196,38 @@
 
     /* ==================== JOURNEY MAP (slide 7) ==================== */
     .journey-track {
-      display: flex; align-items: center;
+      display: flex; align-items: stretch;
       gap: 8px; width: 100%;
       margin-top: 4px;
     }
     .journey-start-stop {
       display: flex; flex-direction: column; align-items: center;
+      justify-content: center;
       gap: 6px; padding: 4px 8px; flex-shrink: 0;
+    }
+    .zone-wrapper {
+      display: flex; flex-direction: column; flex: 1; gap: 14px;
     }
     .journey-zone {
       display: flex; align-items: center;
       padding: 22px 10px 10px; border-radius: 12px;
-      position: relative; flex: 1;
+      position: relative;
       border: 1px solid transparent;
+    }
+    .zone-bracket {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0 20px;
+    }
+    .zone-bracket-line {
+      width: 100%; height: 9px;
+      border: 1px solid; border-top: none;
+      border-radius: 0 0 6px 6px;
+      opacity: 0.35;
+    }
+    .zone-bracket-name {
+      font-size: 11px; font-family: monospace; font-weight: 700;
+      margin-top: 5px; opacity: 0.7;
+      letter-spacing: 0.3px; color: var(--text);
     }
     .journey-zone-label {
       position: absolute; top: -13px; left: 50%;
@@ -247,7 +266,7 @@
       box-shadow: 0 0 0 3px var(--stop-color, var(--accent)),
                   0 0 14px var(--stop-color, var(--accent));
     }
-    .journey-arrow { color: #2a2a2a; font-size: 16px; flex-shrink: 0; }
+    .journey-arrow { color: #2a2a2a; font-size: 16px; flex-shrink: 0; display: flex; align-items: center; }
     .journey-drawer {
       border: 1px solid var(--surface-border);
       border-radius: 12px; padding: 16px 24px;
@@ -283,7 +302,7 @@
     }
     .drawer-title { font-size: 20px; font-weight: 500; color: var(--text); margin-bottom: 6px; line-height: 1.35; }
     .drawer-body  { font-size: 16px; color: #fff; line-height: 1.6; }
-    .drawer-link  { font-size: 15px; margin-top: 10px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+    .drawer-link  { font-size: 15px; margin-top: 10px; display: flex; align-items: center; gap: 5px; cursor: pointer; min-height: 1.4em; }
 
     /* ==================== DEMO PLACEHOLDER (slide 8) ==================== */
     .demo-placeholder {
@@ -577,7 +596,7 @@
             <div class="drawer-agent" id="drawer-agent"></div>
             <div class="drawer-title" id="drawer-title"></div>
             <div class="drawer-body"  id="drawer-body"></div>
-            <div class="drawer-link"  id="drawer-link" style="display:none;"></div>
+            <div class="drawer-link"  id="drawer-link" style="visibility:hidden;"></div>
           </div>
         </div>
       </div>
@@ -669,7 +688,7 @@
   <script>
     /* ===== DATOS PARADAS SLIDE 7 — EDITAR AQUÍ ===== */
     const STOPS = [
-      { id: 1,  label: "Traspaso comercial",         agent: null,           agentLabel: "Inicio",        description: "[PENDIENTE: descripción]", videoUrl: null },
+      { id: 1,  label: "Traspaso comercial",         agent: null,           agentLabel: "Inicio",        description: "Todas las reuniones de discovery mantenidas con el cliente durante la fase de venta son grabadas y transcritas automáticamente, y el contenido —compromisos adquiridos, contexto del cliente y expectativas del proyecto— queda estructurado y accesible para todo el equipo desde el primer día, sin pérdida de información entre la venta y la entrega.", videoUrl: null },
       { id: 2,  label: "Kickoff & workshops",         agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null },
       { id: 3,  label: "Sesiones de consultoría",     agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null },
       { id: 4,  label: "Diseño de la solución func.", agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null },
@@ -796,29 +815,26 @@
 
       const linkEl = document.getElementById('drawer-link');
       if (stop.videoUrls && stop.videoUrls.length) {
-        linkEl.style.display = 'flex';
-        linkEl.style.gap     = '16px';
-        linkEl.onclick       = null;
-        linkEl.innerHTML     = stop.videoUrls.map(v =>
+        linkEl.style.visibility = 'visible';
+        linkEl.style.display    = 'flex';
+        linkEl.style.gap        = '16px';
+        linkEl.onclick          = null;
+        linkEl.innerHTML        = stop.videoUrls.map(v =>
           `<span style="cursor:pointer;color:${colors.text};" onclick="window.open('${v.url}','_blank')">▶ ${v.label}</span>`
         ).join('');
       } else if (stop.videoUrl) {
-        linkEl.style.display  = 'flex';
-        linkEl.style.gap      = '';
-        linkEl.style.color    = colors.text;
-        linkEl.innerHTML      = '';
-        linkEl.textContent    = '▶ Demo';
-        linkEl.onclick        = () => window.open(stop.videoUrl, '_blank');
-      } else if (stop.description.startsWith('[PENDIENTE')) {
-        linkEl.style.display  = 'block';
-        linkEl.style.gap      = '';
-        linkEl.style.color    = '#2a2a2a';
-        linkEl.innerHTML      = '';
-        linkEl.textContent    = '[PENDIENTE: enlace vídeo]';
-        linkEl.onclick        = null;
+        linkEl.style.visibility = 'visible';
+        linkEl.style.display    = 'flex';
+        linkEl.style.gap        = '';
+        linkEl.style.color      = colors.text;
+        linkEl.innerHTML        = '';
+        linkEl.textContent      = '▶ Demo';
+        linkEl.onclick          = () => window.open(stop.videoUrl, '_blank');
       } else {
-        linkEl.style.display  = 'none';
-        linkEl.innerHTML      = '';
+        linkEl.style.visibility = 'hidden';
+        linkEl.style.display    = 'flex';
+        linkEl.innerHTML        = '';
+        linkEl.onclick          = null;
       }
 
       drawer.style.borderColor = colors.border || 'rgba(255,126,255,.25)';
@@ -878,11 +894,11 @@
 
     /* ==================== JOURNEY MAP RENDER ==================== */
     const JOURNEY_GROUPS = [
-      { agent: null,           stops: [0] },
-      { agent: 'consultor',    stops: [1, 2, 3, 4] },
-      { agent: 'arquitecto',   stops: [5, 6, 7, 8] },
-      { agent: 'desarrollador',stops: [9] },
-      { agent: 'consultor',    stops: [10, 11] },
+      { agent: null,           stops: [0],         assistantLabel: null },
+      { agent: 'consultor',    stops: [1, 2, 3, 4],assistantLabel: 'consultant-assistant' },
+      { agent: 'arquitecto',   stops: [5, 6, 7, 8],assistantLabel: 'architect-assistant' },
+      { agent: 'desarrollador',stops: [9],          assistantLabel: 'developer-assistant' },
+      { agent: 'consultor',    stops: [10, 11],     assistantLabel: 'qa-assistant' },
     ];
 
     function createStopEl(stop) {
@@ -961,6 +977,10 @@
           track.appendChild(el);
         } else {
           const colors = AGENT_COLORS[group.agent];
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'zone-wrapper';
+
           const zone = document.createElement('div');
           zone.className = 'journey-zone';
           zone.style.cssText = `background:${colors.bg};border-color:${colors.border};border:1px solid ${colors.border};`;
@@ -972,7 +992,24 @@
           zone.appendChild(zLabel);
 
           group.stops.forEach(idx => zone.appendChild(createStopEl(STOPS[idx])));
-          track.appendChild(zone);
+          wrapper.appendChild(zone);
+
+          if (group.assistantLabel) {
+            const bracket = document.createElement('div');
+            bracket.className = 'zone-bracket';
+            const line = document.createElement('div');
+            line.className = 'zone-bracket-line';
+            line.style.borderColor = colors.text;
+            const name = document.createElement('div');
+            name.className = 'zone-bracket-name';
+            name.style.color = colors.text;
+            name.textContent = group.assistantLabel;
+            bracket.appendChild(line);
+            bracket.appendChild(name);
+            wrapper.appendChild(bracket);
+          }
+
+          track.appendChild(wrapper);
         }
       });
     }
