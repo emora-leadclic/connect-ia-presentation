@@ -127,7 +127,9 @@
     .nav-key   {
       background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
       border-radius: 4px; padding: 2px 8px; font-size: 10px; color: var(--text-dim);
+      cursor: pointer; user-select: none; transition: background .15s, color .15s;
     }
+    .nav-key:hover { background: rgba(255,255,255,.10); color: var(--text); }
 
     /* ==================== CONTENT WRAPPERS ==================== */
     .content-top  { display: flex; flex-direction: column; gap: 20px; }
@@ -1181,7 +1183,7 @@
     /* ==================== SLIDE ENGINE ==================== */
     const TOTAL_SLIDES = 12;
     let currentIndex = 0;
-    let isAnimating  = false;
+    let currentTl    = null;
 
     const getSlides = () => document.querySelectorAll('.slide');
     const getDots   = () => document.querySelectorAll('.dot');
@@ -1191,15 +1193,29 @@
     }
 
     function goToSlide(targetIndex, direction) {
-      if (isAnimating) return;
       if (targetIndex < 0 || targetIndex >= TOTAL_SLIDES) return;
       if (targetIndex === currentIndex) return;
-      isAnimating = true;
+
+      // Kill any running timeline immediately and settle slides to their final positions
+      if (currentTl) {
+        currentTl.kill();
+        currentTl = null;
+        const slides = getSlides();
+        slides.forEach((s, i) => {
+          if (i === currentIndex) {
+            gsap.set(s, { xPercent: 0, opacity: 1 });
+            s.classList.add('is-active');
+          } else {
+            gsap.set(s, { xPercent: 0, opacity: 0 });
+            s.classList.remove('is-active');
+          }
+        });
+      }
 
       const slides    = getSlides();
       const fromSlide = slides[currentIndex];
       const toSlide   = slides[targetIndex];
-      if (!fromSlide || !toSlide) { isAnimating = false; return; }
+      if (!fromSlide || !toSlide) return;
 
       const dir  = direction !== undefined ? direction : (targetIndex > currentIndex ? 1 : -1);
       const toEls = toSlide.querySelectorAll('[data-a]');
@@ -1208,21 +1224,22 @@
       gsap.set(toSlide, { xPercent: dir * 100, opacity: 1 });
       toSlide.classList.add('is-active');
 
-      const tl = gsap.timeline({
+      currentTl = gsap.timeline({
         onComplete: () => {
           fromSlide.classList.remove('is-active');
           gsap.set(fromSlide, { xPercent: -dir * 100, opacity: 0 });
           currentIndex = targetIndex;
-          isAnimating  = false;
+          currentTl    = null;
           updateProgress();
-        },
-        onInterrupt: () => { isAnimating = false; }
+        }
       });
-      tl.to(fromSlide, { xPercent: -dir * 100, duration: 0.5, ease: 'power2.inOut' }, 0);
-      tl.to(toSlide,   { xPercent: 0,           duration: 0.5, ease: 'power2.inOut' }, 0);
+      currentTl.to(fromSlide, { xPercent: -dir * 100, duration: 0.5, ease: 'power2.inOut' }, 0);
+      currentTl.to(toSlide,   { xPercent: 0,           duration: 0.5, ease: 'power2.inOut' }, 0);
       if (toEls.length) {
-        tl.to(toEls, { opacity: 1, duration: 0.4, stagger: 0.1, ease: 'power2.out', clearProps: 'opacity' }, 0.15);
+        currentTl.to(toEls, { opacity: 1, duration: 0.4, stagger: 0.1, ease: 'power2.out', clearProps: 'opacity' }, 0.15);
       }
+      currentIndex = targetIndex;
+      updateProgress();
     }
 
     const goNext = () => goToSlide(currentIndex + 1,  1);
@@ -1234,6 +1251,15 @@
     });
 
     // Click navigation disabled — use keyboard arrows only (clicks reserved for video links)
+
+    // Nav-key buttons click support
+    document.querySelectorAll('.nav-key').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (btn.textContent.trim() === '←') goPrev();
+        else goNext();
+      });
+    });
 
     let touchStartX = 0, touchStartY = 0;
     document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; touchStartY = e.changedTouches[0].clientY; }, { passive: true });
