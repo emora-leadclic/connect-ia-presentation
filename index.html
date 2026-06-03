@@ -315,19 +315,19 @@
       background: rgba(100,180,255,.03);
     }
     .orch-container-label {
-      font-size: 8px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
-      color: rgba(100,180,255,.55); margin-bottom: 6px; font-size: 12px;
+      font-size: 14px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+      color: rgba(100,180,255,.55); margin-bottom: 6px;
     }
     .orch-container-body { display: flex; gap: 20px; align-items: stretch; width: 100%; }
     .orch-container--agents {
       border-color: rgba(80,240,160,.25); background: rgba(80,240,160,.03); flex: 1;
       padding-top: 14px; padding-bottom: 14px;
     }
-    .orch-container--agents .orch-container-label { color: rgba(80,240,160,.5); font-size: 12px; }
+    .orch-container--agents .orch-container-label { color: rgba(80,240,160,.5);}
     /* Task column (left side of each container) */
-    .orch-task-col { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; min-width: 155px; }
+    .orch-task-col { display: flex; flex-direction: column-reverse; align-self: center; gap: 3px; flex-shrink: 0; min-width: 155px; }
     /* Vertical separators */
-    .orch-vsep { width: 1px; flex-shrink: 0; margin: 0 4px; background: rgba(100,180,255,.12); }
+    .orch-vsep { width: 1px; flex-shrink: 0; margin: 20px 4px; background: rgba(100,180,255,.12); }
     /* Step boxes inside orchestrator */
     .orch-step-box {
       width: 100%; border: 1px solid rgba(100,180,255,.2); border-radius: 8px;
@@ -338,7 +338,7 @@
     /* Fan column (right side of green container) */
     .orch-fan-col { flex: 1; display: flex; align-items: center; justify-content: center; }
     /* Task rows */
-    .orch-task-row  { display: flex; align-items: center; gap: 6px; font-size: clamp(11px,1.3vh,15px); color: var(--text-muted); padding: 2px 0; }
+    .orch-task-row  { display: flex; align-items: center; gap: 6px; font-size: clamp(15px,1.3vh,15px); color: var(--text-muted); padding: 2px 0; }
     .orch-task-icon { font-size: clamp(11px,1.3vh,15px); flex-shrink: 0; line-height: 1; }
     /* Full-width tree */
     .orch-tree {
@@ -916,7 +916,7 @@
             <div class="orch-connector"><div class="orch-connector-line" style="height:6px;"></div><div class="orch-connector-arrow">▼</div></div>
             <!-- Green: Subagents container (left: tasks · right: agent fan) -->
             <div class="orch-container orch-container--agents">
-              <div class="orch-container-label">⚡ Agentes especializados · en paralelo</div>
+              <div class="orch-container-label">Agentes especializados · en paralelo</div>
               <div class="orch-container-body">
                 <!-- Left: lifecycle tasks for each agent -->
                 <div class="orch-task-col">
