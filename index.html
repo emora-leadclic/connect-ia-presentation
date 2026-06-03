@@ -148,6 +148,11 @@
     .card-eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
     .card-title  { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
     .card-body   { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+    .card-body code {
+      background: rgba(255,126,255,.1); border: 1px solid rgba(255,126,255,.2);
+      border-radius: 4px; padding: 1px 6px; font-size: 13px;
+      font-family: 'SF Mono', 'Fira Code', monospace; color: var(--accent);
+    }
 
     /* ==================== ACCENT LINE ==================== */
     .accent-line {
@@ -193,6 +198,154 @@
     .recipe-step-label { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
     .recipe-step-desc  { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
     .recipe-arrow      { color: var(--text-dim); font-size: 18px; flex-shrink: 0; }
+
+    /* ==================== ORCHESTRATION FLOW (slide 8) ==================== */
+    /* ==================== ORCH DIAGRAM (slide 8) ==================== */
+    .orch-diagram {
+      display: flex; align-items: stretch; gap: 0; width: 100%;
+    }
+    /* Left: lifecycle steps */
+    .orch-lifecycle {
+      display: flex; flex-direction: column; gap: 7px; flex-shrink: 0;
+      width: 200px; margin-top: 0; align-self: center;
+    }
+    .orch-lc-tag {
+      font-size: 8px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--accent-cd); margin-bottom: 2px;
+    }
+    .orch-lc-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 10px;
+      background: var(--surface); border: 1px solid rgba(255,255,255,.06);
+      border-radius: 7px; transition: border-color .2s;
+    }
+    .orch-lc-row:hover { border-color: rgba(80,240,160,.2); }
+    .orch-lc-icon { font-size: 13px; flex-shrink: 0; }
+    .orch-lc-label { font-size: 10px; color: var(--text-soft); font-weight: 500; }
+    /* Horizontal connector */
+    .orch-hconn {
+      display: flex; align-items: center; align-self: center;
+      flex-shrink: 0; padding: 0 4px;
+    }
+    .orch-hline {
+      width: 20px; height: 1px;
+      background: rgba(80,240,160,.3);
+    }
+    .orch-harrow { color: var(--accent-cd); font-size: 10px; margin-left: -2px; }
+    /* Right: vertical tree */
+    .orch-tree {
+      display: flex; flex-direction: column; gap: 0; align-items: center; flex: 1;
+    }
+    .orch-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; width: 100%;
+    }
+    .orch-node {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 10px; padding: 10px 24px; text-align: center;
+      transition: border-color .2s;
+    }
+    .orch-node:hover { border-color: rgba(255,126,255,.3); }
+    .orch-node-icon { font-size: 18px; margin-bottom: 3px; display: block; }
+    .orch-node-label {
+      font-size: 13px; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; margin-bottom: 2px;
+    }
+    .orch-node-desc { font-size: 12px; color: var(--text-muted); line-height: 1.3; }
+    .orch-node--input { border-color: rgba(255,126,255,.25); }
+    .orch-node--input .orch-node-label { color: var(--accent); }
+    .orch-node--orch  { border-color: rgba(100,180,255,.25); }
+    .orch-node--orch .orch-node-label  { color: var(--accent-ca); }
+    .orch-node--agent  { flex: 1; border-color: rgba(80,240,160,.2); padding: 25px 50px; }
+    .orch-node--agent .orch-node-label { color: var(--accent-cd); }
+    .orch-node--output { border-color: rgba(255,126,255,.25); }
+    .orch-node--output .orch-node-label { color: var(--accent); }
+    .orch-connector {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0; padding: 2px 0;
+    }
+    .orch-connector-line {
+      width: 1px; height: 8px;
+      background: linear-gradient(to bottom, rgba(255,255,255,.12), rgba(255,255,255,.04));
+    }
+    .orch-connector-arrow { color: var(--text-dim); font-size: 8px; line-height: 1; }
+    .orch-fan {
+      display: flex; align-items: flex-start; justify-content: center;
+      position: relative; padding-top: 2px; width: 100%; gap: 8px;
+    }
+    .orch-fan::before {
+      content: ''; position: absolute; top: 0; left: 12%; right: 12%;
+      height: 1px; background: rgba(255,255,255,.08);
+    }
+    .orch-fan-branch {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; gap: 0;
+    }
+    .orch-fan-branch .orch-connector-line { height: 6px; }
+    /* Container boxes */
+    .orch-container {
+      display: flex; flex-direction: column; align-items: stretch; gap: 0;
+      border: 1px solid rgba(100,180,255,.25); border-radius: 12px;
+      padding: 8px 40px 10px; width: 100%;
+      background: rgba(100,180,255,.03);
+    }
+    .orch-container-label {
+      font-size: 8px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+      color: rgba(100,180,255,.55); margin-bottom: 6px; font-size: 12px;
+    }
+    .orch-container-body { display: flex; gap: 20px; align-items: stretch; width: 100%; }
+    .orch-container--agents {
+      border-color: rgba(80,240,160,.25); background: rgba(80,240,160,.03); flex: 1;
+      padding-top: 14px; padding-bottom: 14px;
+    }
+    .orch-container--agents .orch-container-label { color: rgba(80,240,160,.5); font-size: 12px; }
+    /* Task column (left side of each container) */
+    .orch-task-col { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; min-width: 155px; }
+    /* Vertical separators */
+    .orch-vsep { width: 1px; flex-shrink: 0; margin: 0 4px; background: rgba(100,180,255,.12); }
+    /* Step boxes inside orchestrator */
+    .orch-step-box {
+      width: 100%; border: 1px solid rgba(100,180,255,.2); border-radius: 8px;
+      padding: 8px 12px; background: rgba(100,180,255,.04);
+      display: flex; flex-wrap: wrap; gap: 4px 18px;
+    }
+    .orch-vsep--green { background: rgba(80,240,160,.12); }
+    /* Fan column (right side of green container) */
+    .orch-fan-col { flex: 1; display: flex; align-items: center; justify-content: center; }
+    /* Task rows */
+    .orch-task-row  { display: flex; align-items: center; gap: 6px; font-size: 15px; color: var(--text-muted); padding: 3px 0; }
+    .orch-task-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
+    /* Full-width tree */
+    .orch-tree {
+      display: flex; flex-direction: column; gap: 0; align-items: center;
+      width: 100%; margin: 0 auto;
+    }
+
+    /* ==================== CI LOOP (slide 9) ==================== */
+    .ci-loop {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; padding: 8px 0;
+    }
+    .ci-loop-step {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 10px; padding: 12px 16px; text-align: center;
+      flex: 1; max-width: 180px;
+    }
+    .ci-loop-step-icon { font-size: 18px; margin-bottom: 4px; display: block; }
+    .ci-loop-step-label { font-size: 11px; font-weight: 500; color: var(--text); line-height: 1.3; }
+    .ci-loop-arrow { color: var(--text-dim); font-size: 16px; flex-shrink: 0; }
+    .ci-loop-return {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; padding-top: 4px;
+    }
+    .ci-loop-return-line {
+      height: 1px; flex: 1; max-width: 200px;
+      background: linear-gradient(to right, transparent, rgba(80,240,160,.2), transparent);
+    }
+    .ci-loop-return-label {
+      font-size: 10px; font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--accent-cd); white-space: nowrap;
+    }
 
     /* ==================== JOURNEY MAP (slide 7) ==================== */
     .journey-track {
@@ -299,8 +452,54 @@
     }
     .demo-placeholder-hint { font-size: 13px; color: #222; }
 
-    /* ==================== CLOSING SLIDE (slide 10) ==================== */
-    #slide-10 { overflow: hidden; align-items: center; justify-content: center; text-align: center; }
+    /* ==================== DEMO VIDEO (slide 10) ==================== */
+    .demo-video-area {
+      flex: 1; min-height: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .demo-video-placeholder {
+      width: 100%; max-width: 740px;
+      aspect-ratio: 16 / 9;
+      border: 1px dashed rgba(255,255,255,.12);
+      border-radius: 12px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px;
+      background: rgba(255,255,255,.02);
+      transition: border-color .2s;
+    }
+    .demo-video-placeholder:hover { border-color: rgba(255,126,255,.25); }
+    .demo-video-icon {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,126,255,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--accent);
+      background: rgba(255,126,255,.06);
+    }
+    .demo-video-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .demo-video-hint { font-size: 13px; color: #222; }
+    .demo-highlights {
+      display: flex; gap: 32px;
+      justify-content: center; padding-bottom: 8px;
+    }
+    .demo-highlight-item {
+      display: flex; align-items: baseline; gap: 10px;
+    }
+    .demo-highlight-num {
+      font-family: var(--font-title); font-style: italic;
+      font-size: 20px; color: rgba(255,126,255,.3); line-height: 1;
+    }
+    .demo-highlight-text {
+      font-size: 13px; color: var(--text-muted); line-height: 1.5;
+      max-width: 260px;
+    }
+
+    /* ==================== CLOSING SLIDE (slide 12) ==================== */
+    #slide-12 { overflow: hidden; align-items: center; justify-content: center; text-align: center; }
     .cierre-glow {
       position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%);
       width: 600px; height: 300px;
@@ -326,6 +525,7 @@
       .recipe-flow { flex-direction: column; }
       .recipe-arrow { transform: rotate(90deg); }
       .journey-track { overflow-x: auto; padding-bottom: 8px; }
+      .demo-highlights { flex-direction: column; gap: 12px; align-items: flex-start; padding-left: 24px; }
       #progress { bottom: 16px; }
     }
     @media (max-width: 480px) {
@@ -411,7 +611,7 @@
         <div class="accent-line" data-a>"No es una tendencia que viene. Es una ventaja que ya estamos ejerciendo."</div>
       </div>
       <div class="slide-footer" data-a>
-        <div class="slide-num">02 / 10</div>
+        <div class="slide-num">02 / 12</div>
         <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
       </div>
     </div>
@@ -448,7 +648,7 @@
         </div>
       </div>
       <div class="slide-footer" data-a>
-        <div class="slide-num">03 / 10</div>
+        <div class="slide-num">03 / 12</div>
         <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
       </div>
     </div>
@@ -480,7 +680,7 @@
         <div class="accent-line" data-a>"La calidad no es una promesa. Está incrustada en el método."</div>
       </div>
       <div class="slide-footer" data-a>
-        <div class="slide-num">04 / 10</div>
+        <div class="slide-num">04 / 12</div>
         <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
       </div>
     </div>
@@ -520,7 +720,7 @@
         <div class="accent-line" data-a>"Construido con Claude Code por ser lo mejor, pero sobre estándares: ya probamos Antigravity como respaldo. No hay dependencia de proveedor."</div>
       </div>
       <div class="slide-footer" data-a>
-        <div class="slide-num">05 / 10</div>
+        <div class="slide-num">05 / 12</div>
         <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
       </div>
     </div>
@@ -554,7 +754,7 @@
         </div>
       </div>
       <div class="slide-footer" data-a>
-        <div class="slide-num">06 / 10</div>
+        <div class="slide-num">06 / 12</div>
         <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
       </div>
     </div>
@@ -582,30 +782,224 @@
         </div>
       </div>
       <div class="slide-footer" data-a>
-        <div class="slide-num">07 / 10</div>
+        <div class="slide-num">07 / 12</div>
         <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
       </div>
     </div>
 
 
-    <!-- SLIDE 08: DEMO UATs — PLACEHOLDER -->
+    <!-- SLIDE 08: UATs CON IA — LA CAPACIDAD -->
     <div class="slide" id="slide-08">
       <div class="content-top">
-        <div class="section-tag" data-a>Demo en vivo</div>
-        <div class="slide-title" data-a>Automatización<br>de <em>UATs</em></div>
+        <div class="section-tag" data-a>UATs con IA</div>
+        <div class="slide-title" data-a>De pruebas manuales<br>a <em>sistema autónomo</em></div>
       </div>
-      <div class="demo-placeholder" data-a>
-        <div class="demo-placeholder-label">Demo en vivo · ≈ 5 min</div>
-        <div class="demo-placeholder-hint">[Esta slide se diseñará en una iteración posterior]</div>
+      <div class="content-body" style="gap:10px;justify-content:flex-start;">
+        <div class="orch-tree" data-a>
+          <!-- Input -->
+          <div class="orch-row">
+            <div class="orch-node orch-node--input" style="min-width:240px;">
+              <span class="orch-node-icon">📋</span>
+              <div class="orch-node-label">Plan de aceptación</div>
+              <div class="orch-node-desc">Casos de prueba del líder funcional</div>
+            </div>
+          </div>
+          <div class="orch-connector"><div class="orch-connector-line"></div><div class="orch-connector-arrow">▼</div></div>
+          <!-- Blue: Orchestrator container (vertical: pre-box → agents → post-box) -->
+          <div class="orch-container">
+            <div class="orch-container-label">🤖 Agente orquestador</div>
+            <!-- Pre-agents step box -->
+            <div class="orch-row">
+              <div class="orch-node orch-node--orch">
+                <span class="orch-node-icon">🧩</span>
+                <div class="orch-node-label">Planificación</div>
+                <div class="orch-node-desc">Analiza el plan · identifica módulos · distribuye el trabajo</div>
+              </div>
+            </div>
+            <div class="orch-connector"><div class="orch-connector-line" style="height:6px;"></div><div class="orch-connector-arrow">▼</div></div>
+            <!-- Green: Subagents container (left: tasks · right: agent fan) -->
+            <div class="orch-container orch-container--agents">
+              <div class="orch-container-label">⚡ Agentes especializados · en paralelo</div>
+              <div class="orch-container-body">
+                <!-- Left: lifecycle tasks for each agent -->
+                <div class="orch-task-col">
+                  <div class="orch-task-row"><span class="orch-task-icon">📦</span>Prepara los datos</div>
+                  <div class="orch-task-row"><span class="orch-task-icon">🔑</span>Inicia sesión</div>
+                  <div class="orch-task-row"><span class="orch-task-icon">🔍</span>Explora el sistema real</div>
+                  <div class="orch-task-row"><span class="orch-task-icon">✍️</span>Escribe la prueba</div>
+                  <div class="orch-task-row"><span class="orch-task-icon">▶️</span>Ejecuta y valida</div>
+                  <div class="orch-task-row"><span class="orch-task-icon">📸</span>Captura evidencia</div>
+                  <div class="orch-task-row"><span class="orch-task-icon">🧹</span>Limpia los datos</div>
+                </div>
+                <div class="orch-vsep orch-vsep--green"></div>
+                <!-- Right: agent fan -->
+                <div class="orch-fan-col">
+                  <div class="orch-fan">
+                    <div class="orch-fan-branch">
+                      <div class="orch-connector-line"></div>
+                      <div class="orch-connector-arrow">▼</div>
+                      <div class="orch-node orch-node--agent" style="margin-top:3px;">
+                        <span class="orch-node-icon" style="font-size:26px;">🤖</span>
+                        <div class="orch-node-label">Ventas</div>
+                      </div>
+                    </div>
+                    <div class="orch-fan-branch">
+                      <div class="orch-connector-line"></div>
+                      <div class="orch-connector-arrow">▼</div>
+                      <div class="orch-node orch-node--agent" style="margin-top:3px;">
+                        <span class="orch-node-icon" style="font-size:26px;">🤖</span>
+                        <div class="orch-node-label">Cuentas</div>
+                      </div>
+                    </div>
+                    <div class="orch-fan-branch">
+                      <div class="orch-connector-line"></div>
+                      <div class="orch-connector-arrow">▼</div>
+                      <div class="orch-node orch-node--agent" style="margin-top:3px;">
+                        <span class="orch-node-icon" style="font-size:26px;">🤖</span>
+                        <div class="orch-node-label">Soporte</div>
+                      </div>
+                    </div>
+                    <div class="orch-fan-branch">
+                      <div class="orch-connector-line"></div>
+                      <div class="orch-connector-arrow">▼</div>
+                      <div class="orch-node orch-node--agent" style="margin-top:3px;border-style:dashed;opacity:.5;">
+                        <span class="orch-node-icon">···</span>
+                        <div class="orch-node-label">N módulos</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="orch-connector"><div class="orch-connector-line" style="height:6px;"></div><div class="orch-connector-arrow">▼</div></div>
+            <!-- Post-agents step box -->
+            <div class="orch-row">
+              <div class="orch-node orch-node--orch">
+                <span class="orch-node-icon">📥</span>
+                <div class="orch-node-label">Consolidación</div>
+                <div class="orch-node-desc">Consolida todos los resultados · genera el informe de evidencia</div>
+              </div>
+            </div>
+          </div>
+          <div class="orch-connector"><div class="orch-connector-line" style="height:6px;"></div><div class="orch-connector-arrow">▼</div></div>
+          <!-- Output -->
+          <div class="orch-row">
+            <div class="orch-node orch-node--output" style="min-width:280px;">
+              <span class="orch-node-icon">✅</span>
+              <div class="orch-node-label">Pruebas + Evidencia</div>
+              <div class="orch-node-desc">Pruebas validadas · Capturas paso a paso · Listo para el cliente</div>
+            </div>
+          </div>
+        </div>
+
       </div>
       <div class="slide-footer" data-a>
-        <div class="slide-num">08 / 10</div>
+        <div class="slide-num">08 / 12</div>
         <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
       </div>
     </div>
 
-    <!-- SLIDE 09: VISIÓN A FUTURO -->
+    <!-- SLIDE 09: DE UATs A CALIDAD CONTINUA -->
     <div class="slide" id="slide-09">
+      <div class="content-top">
+        <div class="section-tag" data-a>Más allá de las UATs</div>
+        <div class="slide-title" data-a>De pruebas puntuales<br>a <em>calidad continua</em></div>
+      </div>
+      <div class="content-body" style="gap:12px;justify-content:flex-start;">
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:center;" data-a>
+          <div class="ci-loop">
+            <div class="ci-loop-step">
+              <span class="ci-loop-step-icon">💻</span>
+              <div class="ci-loop-step-label">Desarrollo</div>
+            </div>
+            <div class="ci-loop-arrow">→</div>
+            <div class="ci-loop-step">
+              <span class="ci-loop-step-icon">🔒</span>
+              <div class="ci-loop-step-label">Validación automática</div>
+            </div>
+            <div class="ci-loop-arrow">→</div>
+            <div class="ci-loop-step">
+              <span class="ci-loop-step-icon">🚀</span>
+              <div class="ci-loop-step-label">Entrega</div>
+            </div>
+            <div class="ci-loop-arrow">→</div>
+            <div class="ci-loop-step">
+              <span class="ci-loop-step-icon">🔄</span>
+              <div class="ci-loop-step-label">Regresión</div>
+            </div>
+            <div class="ci-loop-arrow">→</div>
+            <div class="ci-loop-step">
+              <span class="ci-loop-step-icon">📊</span>
+              <div class="ci-loop-step-label">Panel de resultados</div>
+            </div>
+          </div>
+          <div class="ci-loop-return">
+            <div class="ci-loop-return-line"></div>
+            <div class="ci-loop-return-label">Ciclo continuo</div>
+            <div class="ci-loop-return-line"></div>
+          </div>
+        </div>
+
+        <div class="cards-3" data-a>
+          <div class="card">
+            <div class="card-eyebrow">Antes de integrar</div>
+            <div class="card-title">Cada cambio se valida antes de incorporarlo</div>
+            <div class="card-body">Cuando un desarrollador propone un cambio, el equipo puede lanzar las pruebas con un solo comando. Si las pruebas no pasan, el cambio no se integra. Se acabó descubrir problemas después de la entrega.</div>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Después de cada entrega</div>
+            <div class="card-title">Regresión automática en cada despliegue</div>
+            <div class="card-body">Tras cada entrega exitosa a cualquier entorno, se ejecutan automáticamente las pruebas de los módulos afectados más una verificación general. Si algo que funcionaba deja de funcionar, el equipo lo sabe al momento.</div>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Visibilidad</div>
+            <div class="card-title">Un panel con el histórico de todas las ejecuciones</div>
+            <div class="card-body">Cada ejecución publica su informe de resultados y el report de evidencia en un panel accesible para todo el equipo. Con fecha, entorno, y enlace directo al detalle. Trazabilidad completa.</div>
+          </div>
+        </div>
+        <div class="accent-line" data-a>"Las UATs dejan de ser un hito puntual. Se convierten en una red de seguridad permanente."</div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">09 / 12</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: DEMO UATs — VÍDEO -->
+    <div class="slide" id="slide-10">
+      <div class="content-top">
+        <div class="section-tag" data-a>Demo</div>
+        <div class="slide-title" data-a>UATs en <em>acción</em></div>
+      </div>
+      <div class="demo-video-area" data-a>
+        <div class="demo-video-placeholder">
+          <div class="demo-video-icon">▶</div>
+          <div class="demo-video-label">Vídeo · ≈ 5 min</div>
+          <div class="demo-video-hint">[Insertar vídeo grabado aquí]</div>
+        </div>
+      </div>
+      <div class="demo-highlights" data-a>
+        <div class="demo-highlight-item">
+          <span class="demo-highlight-num">01</span>
+          <span class="demo-highlight-text">El agente recibe el plan de aceptación y reparte el trabajo por módulo</span>
+        </div>
+        <div class="demo-highlight-item">
+          <span class="demo-highlight-num">02</span>
+          <span class="demo-highlight-text">Cada agente navega el sistema real y genera las pruebas</span>
+        </div>
+        <div class="demo-highlight-item">
+          <span class="demo-highlight-num">03</span>
+          <span class="demo-highlight-text">Se genera el informe de evidencia con capturas paso a paso</span>
+        </div>
+      </div>
+      <div class="slide-footer" data-a>
+        <div class="slide-num">10 / 12</div>
+        <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: VISIÓN A FUTURO -->
+    <div class="slide" id="slide-11">
       <div class="content-top">
         <div class="section-tag" data-a>Lo que viene</div>
         <div class="slide-title" data-a>Visión<br>a <em>futuro</em></div>
@@ -639,13 +1033,13 @@
         <div class="accent-line" data-a>"No es un proyecto. Es la forma en que trabajamos."</div>
       </div>
       <div class="slide-footer" data-a>
-        <div class="slide-num">09 / 10</div>
+        <div class="slide-num">11 / 12</div>
         <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
       </div>
     </div>
 
-    <!-- SLIDE 10: GRACIAS -->
-    <div class="slide" id="slide-10">
+    <!-- SLIDE 12: GRACIAS -->
+    <div class="slide" id="slide-12">
       <div class="cierre-glow"></div>
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;" data-a>
         <div class="cierre-quote">Gracias.</div>
@@ -657,7 +1051,7 @@
         </svg>
       </div>
       <div class="slide-footer" style="position:absolute;bottom:var(--slide-pad-y);left:var(--slide-pad-x);right:var(--slide-pad-x);" data-a>
-        <div class="slide-num">10 / 10</div>
+        <div class="slide-num">12 / 12</div>
         <div class="nav-hint"><span class="nav-key">←</span><span class="nav-key">→</span></div>
       </div>
     </div>
@@ -679,8 +1073,8 @@
       { id: 8,  label: "Inventario técnico",          agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null },
       { id: 9,  label: "Desglose de tareas",          agent: "arquitecto",   agentLabel: "Arquitecto",    description: "[PENDIENTE: descripción]", videoUrl: null },
       { id: 10, label: "Implementación de tareas",    agent: "desarrollador",agentLabel: "Desarrollador", description: "[PENDIENTE: descripción]", videoUrl: null },
-      { id: 11, label: "Diseño de UATs",              agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null },
-      { id: 12, label: "Ejecución de UATs",           agent: "consultor",    agentLabel: "Consultor",     description: "[PENDIENTE: descripción]", videoUrl: null },
+      { id: 11, label: "Generación de pruebas",        agent: "consultor",    agentLabel: "Consultor",     description: "El líder funcional entrega el plan de aceptación. Un agente orquestador lo analiza, entiende la estructura del proyecto y reparte el trabajo entre agentes especializados — uno por área funcional. Cada agente explora el sistema real, genera las pruebas automatizadas y las valida antes de entregarlas.", videoUrl: null },
+      { id: 12, label: "Ejecución de UATs",           agent: "consultor",    agentLabel: "Consultor",     description: "Las pruebas se ejecutan contra el sistema, produciendo un informe de evidencia con capturas paso a paso. Se integran en el proceso de entrega continua: cada cambio se valida antes de incorporarse, y cada despliegue lanza regresión automática con resultados accesibles para todo el equipo.", videoUrl: null },
     ];
     /* ===== FIN DATOS PARADAS ===== */
 
@@ -691,7 +1085,7 @@
     };
 
     /* ==================== SLIDE ENGINE ==================== */
-    const TOTAL_SLIDES = 10;
+    const TOTAL_SLIDES = 12;
     let currentIndex = 0;
     let isAnimating  = false;
 
